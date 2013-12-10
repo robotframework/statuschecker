@@ -1,0 +1,11 @@
+.pydevproject
+.project
+.idea/
+*.pyc
+.DS_Store
+test/log.html
+test/output.xml
+test/report.html
+dist/
+build/
+*egg-info
