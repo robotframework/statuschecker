@@ -7,7 +7,7 @@ Operating System :: OS Independent
 Programming Language :: Python
 Topic :: Software Development :: Testing
 """.strip().splitlines()
-VERSION ='1.0'
+VERSION ='0.1'
 
 from setuptools import setup
 
@@ -29,5 +29,5 @@ setup(
     keywords         = 'robotframework testing testautomation atdd',
     platforms        = 'any',
     classifiers      = CLASSIFIERS,
-    py_modules       = ['statuschecker']
+    py_modules       = ['robotstatuschecker']
 )
