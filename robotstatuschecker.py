@@ -39,6 +39,8 @@ detail in the tool documentation.
 """
 
 import re
+import sys
+from os.path import abspath
 from robot.api import ExecutionResult, ResultVisitor
 
 class _Expected:
@@ -163,22 +165,21 @@ class StatusCheckerVisitor(ResultVisitor):
 
 
 def process_output(inpath, outpath=None):
+    print 'Checking %s' % abspath(inpath)
     result = ExecutionResult(inpath)
     result.visit(StatusCheckerVisitor())
     result.save(outpath)
+    if outpath:
+        print 'Output: %s' % abspath(outpath)
     return result.return_code
 
 if __name__=='__main__':
-    import sys
-    import os
-
-    if not 2 <= len(sys.argv) <= 3 or '--help' in sys.argv:
+    if '-h' in sys.argv or '--help' in sys.argv:
+        print __doc__
+        sys.exit(0)
+    try:
+        rc = process_output(*sys.argv[1:])
+    except TypeError:
         print __doc__
         sys.exit(1)
-    infile = sys.argv[1]
-    outfile = sys.argv[2] if len(sys.argv) == 3 else None
-    print  'Checking %s' % os.path.abspath(infile)
-    rc = process_output(infile, outfile)
-    if outfile:
-        print 'Output: %s' % os.path.abspath(outfile)
     sys.exit(rc)
