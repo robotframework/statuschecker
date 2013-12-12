@@ -21,7 +21,7 @@ Usage:  statuschecker.py infile [outfile]
 This tool processes Robot Framework output XML files and checks that test case
 statuses and messages are as expected. Main use case is post-processing output
 files got when testing Robot Framework test libraries using Robot Framework
-itself. The tool assumes that Robot Framework is installed tp the system.
+itself. The tool assumes that Robot Framework is installed to the system.
 
 If output file is not given, the input file is considered to be also output
 file and it is edited in place.
@@ -39,100 +39,7 @@ detail in the tool documentation.
 """
 
 import re
-
-from robot.result import ExecutionResult
-
-
-def process_output(inpath, outpath=None):
-    result = ExecutionResult(inpath)
-    _process_suite(result.suite)
-    result.save(outpath)
-    return result.return_code
-
-def _process_suite(suite):
-    for subsuite in suite.suites:
-        _process_suite(subsuite)
-    for test in suite.tests:
-        _process_test(test)
-
-def _process_test(test):
-    exp = _Expected(test.doc)
-    _check_status(test, exp)
-    if test.status == 'PASS':
-        _check_logs(test, exp)
-
-def _check_status(test, exp):
-    if exp.status != test.status:
-        test.status = 'FAIL'
-        if exp.status == 'PASS':
-            test.message = ("Test was expected to PASS but it FAILED. "
-                            "Error message:\n") + test.message
-        else:
-            test.message = ("Test was expected to FAIL but it PASSED. "
-                            "Expected message:\n") + exp.message
-    elif not _message_matches(test.message, exp.message):
-        test.status = 'FAIL'
-        test.message = ("Wrong error message.\n\nExpected:\n%s\n\nActual:\n%s\n"
-                        % (exp.message, test.message))
-    elif test.status == 'FAIL':
-        test.status = 'PASS'
-        test.message = 'Original test failed as expected.'
-
-def _message_matches(actual, expected):
-    if actual == expected:
-        return True
-    if expected.startswith('REGEXP:'):
-        pattern = '^%s$' % expected.replace('REGEXP:', '', 1).strip()
-        if re.match(pattern, actual, re.DOTALL):
-            return True
-    if expected.startswith('STARTS:'):
-        start = expected.replace('STARTS:', '', 1).strip()
-        if actual.startswith(start):
-            return True
-    return False
-
-def _check_logs(test, exp):
-    for kw_indices, msg_index, level, message in exp.logs:
-        try:
-            kw = test.keywords[kw_indices[0]]
-            for index in kw_indices[1:]:
-                kw = kw.keywords[index]
-        except IndexError:
-            indices = '.'.join(str(i+1) for i in kw_indices)
-            test.status = 'FAIL'
-            test.message = ("Test '%s' does not have keyword with index '%s'"
-                            % (test.name, indices))
-            return
-        if len(kw.messages) <= msg_index:
-            if message != 'NONE':
-                test.status = 'FAIL'
-                test.message = ("Keyword '%s' should have had at least %d "
-                                "messages" % (kw.name, msg_index+1))
-        else:
-            if _check_log_level(level, test, kw, msg_index):
-                _check_log_message(message, test, kw, msg_index)
-
-def _check_log_level(expected, test, kw, index):
-    actual = kw.messages[index].level
-    if actual == expected:
-        return True
-    test.status = 'FAIL'
-    test.message = ("Wrong level for message %d of keyword '%s'.\n\n"
-                    "Expected: %s\nActual: %s.\n%s"
-                    % (index+1, kw.name, expected,
-                       actual, kw.messages[index].message))
-    return False
-
-def _check_log_message(expected, test, kw, index):
-    actual = kw.messages[index].message.strip()
-    if _message_matches(actual, expected):
-        return True
-    test.status = 'FAIL'
-    test.message = ("Wrong content for message %d of keyword '%s'.\n\n"
-                    "Expected:\n%s\n\nActual:\n%s"
-                    % (index+1, kw.name, expected, actual))
-    return False
-
+from robot.api import ExecutionResult, ResultVisitor
 
 class _Expected:
 
@@ -172,6 +79,95 @@ class _Expected:
         return level, message
 
 
+class StatusCheckerVisitor(ResultVisitor):
+
+    def visit_test(self, test):
+        expected = _Expected(test.doc)
+        self._check_status(test, expected)
+        if test.status == 'PASS':
+            self._check_logs(test, expected)
+
+    def _check_status(self, test, exp):
+        if exp.status != test.status:
+            test.status = 'FAIL'
+            if exp.status == 'PASS':
+                test.message = ('Test was expected to PASS but it FAILED. '
+                                'Error message:\n') + test.message
+            else:
+                test.message = ('Test was expected to FAIL but it PASSED. '
+                                'Expected message:\n') + exp.message
+        elif not self._message_matches(test.message, exp.message):
+            test.status = 'FAIL'
+            test.message = ('Wrong error message.\n\n'
+                            'Expected:\n%s\n\nActual:\n%s\n' % (exp.message,
+                                                                test.message))
+        elif test.status == 'FAIL':
+            test.status = 'PASS'
+            test.message = 'Original test failed as expected.'
+
+    def _message_matches(self, actual, expected):
+        if actual == expected:
+            return True
+        if expected.startswith('REGEXP:'):
+            pattern = '^%s$' % expected.replace('REGEXP:', '', 1).strip()
+            if re.match(pattern, actual, re.DOTALL):
+                return True
+        if expected.startswith('STARTS:'):
+            start = expected.replace('STARTS:', '', 1).strip()
+            if actual.startswith(start):
+                return True
+        return False
+
+    def _check_logs(self, test, exp):
+        for kw_indices, msg_index, level, message in exp.logs:
+            try:
+                kw = test.keywords[kw_indices[0]]
+                for index in kw_indices[1:]:
+                    kw = kw.keywords[index]
+            except IndexError:
+                indices = '.'.join(str(i+1) for i in kw_indices)
+                test.status = 'FAIL'
+                test.message = ("Test '%s' does not have keyword with index '%s'"
+                                % (test.name, indices))
+                return
+            if len(kw.messages) <= msg_index:
+                if message != 'NONE':
+                    test.status = 'FAIL'
+                    test.message = ("Keyword '%s' should have had at least %d "
+                                    "messages" % (kw.name, msg_index+1))
+            else:
+                if self._check_log_level(level, test, kw, msg_index):
+                    self._check_log_message(message, test, kw, msg_index)
+
+
+    def _check_log_level(self, expected, test, kw, index):
+        actual = kw.messages[index].level
+        if actual == expected:
+            return True
+        test.status = 'FAIL'
+        test.message = ("Wrong level for message %d of keyword '%s'.\n\n"
+                        "Expected: %s\nActual: %s.\n%s"
+                        % (index+1, kw.name, expected,
+                           actual, kw.messages[index].message))
+        return False
+
+    def _check_log_message(self, expected, test, kw, index):
+        actual = kw.messages[index].message.strip()
+        if self._message_matches(actual, expected):
+            return True
+        test.status = 'FAIL'
+        test.message = ("Wrong content for message %d of keyword '%s'.\n\n"
+                        "Expected:\n%s\n\nActual:\n%s"
+                        % (index+1, kw.name, expected, actual))
+        return False
+
+
+def process_output(inpath, outpath=None):
+    result = ExecutionResult(inpath)
+    result.visit(StatusCheckerVisitor())
+    result.save(outpath)
+    return result.return_code
+
 if __name__=='__main__':
     import sys
     import os
@@ -181,10 +177,8 @@ if __name__=='__main__':
         sys.exit(1)
     infile = sys.argv[1]
     outfile = sys.argv[2] if len(sys.argv) == 3 else None
-    print  "Checking %s" % os.path.abspath(infile)
+    print  'Checking %s' % os.path.abspath(infile)
     rc = process_output(infile, outfile)
     if outfile:
-        print "Output: %s" % os.path.abspath(outfile)
-    if rc > 255:
-        rc = 255
+        print 'Output: %s' % os.path.abspath(outfile)
     sys.exit(rc)
