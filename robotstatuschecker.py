@@ -43,7 +43,7 @@ import sys
 from os.path import abspath
 from robot.api import ExecutionResult, ResultVisitor
 
-class _Expected:
+class _Expected(object):
 
     def __init__(self, doc):
         self.status, self.message = self._get_status_and_message(doc)
@@ -140,7 +140,6 @@ class StatusCheckerVisitor(ResultVisitor):
             else:
                 if self._check_log_level(level, test, kw, msg_index):
                     self._check_log_message(message, test, kw, msg_index)
-
 
     def _check_log_level(self, expected, test, kw, index):
         actual = kw.messages[index].level
