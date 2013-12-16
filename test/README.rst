@@ -1,7 +1,8 @@
 Usage
 =====
 
-::
+.. sourcecode :: bash
+
     $ python run_tests.py
 
 This test script first runs `example.txt`, only generating `output.xml`. Then
