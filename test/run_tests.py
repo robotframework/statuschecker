@@ -13,7 +13,9 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import sys
+
 from xml.etree.ElementTree import ElementTree
 from subprocess import call
 
@@ -23,31 +25,36 @@ COMMANDS = [
     'rebot output.xml'.split()
 ]
 
-def check_and_return_errors(xml):
-    errors = []
-    for test_element in xml.iter('test'):
-        name, status = _get_name_and_status(test_element)
-        if name.startswith('FAILURE:'):
-            if status != 'FAIL':
-                errors.append('Test "%s" should have failed but passed' % name)
-        elif status != 'PASS':
-            errors.append('Test "%s" should have passed but failed' % name)
-    return errors
-    
-def check_tests():
-    for cmd in COMMANDS:
-        call(cmd)
-    xml = ElementTree(file='output.xml')
-    errors = check_and_return_errors(xml)
-    if errors:
-        sys.exit('\nTests for StatusChecker have failed:\n\n%s' 
-                 % '\n'.join(errors))
-    print '\nTests for StatusChecker have completed successfully.'
-    sys.exit(0)
+class StatusCheckerChecker():
 
-def _get_name_and_status(test_element):
-    return (test_element.attrib['name'], 
-            test_element.find('status').attrib['status'])
+    def __init__(self):
+        pass
+
+    def check_tests(self):
+        for cmd in COMMANDS:
+            call(cmd)
+        xml = ElementTree(file='output.xml')
+        errors = self.check_and_return_errors(xml)
+        if errors:
+            sys.exit('\nTests for StatusChecker have failed:\n\n%s'
+                     % '\n'.join(errors))
+        print '\nTests for StatusChecker have completed successfully.'
+        sys.exit(0)
+
+    def check_and_return_errors(self, xml):
+        errors = []
+        for test_element in xml.iter('test'):
+            name, status = self._get_name_and_status(test_element)
+            if name.startswith('FAILURE:'):
+                if status != 'FAIL':
+                    errors.append('Test "%s" should have failed but passed' % name)
+            elif status != 'PASS':
+                errors.append('Test "%s" should have passed but failed' % name)
+        return errors
+
+    def _get_name_and_status(self, test_element):
+        return (test_element.attrib['name'],
+                test_element.find('status').attrib['status'])
 
 if __name__ == '__main__':
-    check_tests()
+    StatusCheckerChecker().check_tests()
