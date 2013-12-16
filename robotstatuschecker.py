@@ -45,6 +45,8 @@ using format 'LOG x.y:z LEVEL Actual message', which is described in detail
 in the tool documentation.
 """
 
+__version__ ='0.1'
+
 import re
 import sys
 from os.path import abspath

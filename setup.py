@@ -7,17 +7,20 @@ Operating System :: OS Independent
 Programming Language :: Python
 Topic :: Software Development :: Testing
 """.strip().splitlines()
-VERSION ='0.1'
 
+import sys
+
+from os.path import abspath, dirname
 from setuptools import setup
 
-def readme():
-    with open('README.rst') as f:
-        return f.read()
+sys.path.insert(0, dirname(abspath(__file__)))
+from robotstatuschecker import __version__
+
+print __version__
 
 setup(
     name             = 'robotstatuschecker',
-    version          = VERSION,
+    version          = __version__,
     author           = 'Robot Framework Developers',
     author_email     = 'robotframework@gmail.com',
     url              = 'http://robotframework.org',
@@ -25,7 +28,7 @@ setup(
     license          = 'Apache License 2.0',
     description      = 'A tool for checking that Robot Framework test cases '
                        'have expected statuses and log messages.',
-    long_description = readme(),
+    long_description = open('README.rst').read(),
     keywords         = 'robotframework testing testautomation atdd',
     platforms        = 'any',
     classifiers      = CLASSIFIERS,
