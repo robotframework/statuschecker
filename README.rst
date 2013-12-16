@@ -1,12 +1,12 @@
 StatusChecker
 =============
 
-StatusChecker is a tool for checking that `Robot Framework`_
-test cases have expected statuses and log messages. You should have `Robot
-Farmework`_ installed before using this tool.
+StatusChecker is a tool for checking that `Robot Framework`__ test
+cases have expected statuses and log messages. You should have Robot
+Framework installed before using this tool.
 
-See `project wiki`_ for more information about installing and running 
+See `project wiki`__ for more information about installing and running 
 StatusChecker.
 
-.. _Robot Framework: http://robotframework.org
-.. _project wiki: https://bitbucket.org/robotframework/statuschecker/wiki/Home
+__ http://robotframework.org
+__ https://bitbucket.org/robotframework/statuschecker/wiki/Home
