@@ -18,14 +18,22 @@ import sys
 
 from os import remove
 from os.path import abspath, dirname, exists, join
+from shutil import rmtree
 from subprocess import call
 
 from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
 
+
+CURDIR = dirname(abspath(__file__))
+STATUSCHECKER_PATH = join(dirname(CURDIR), 'robotstatuschecker.py')
+RESULT_DIR = join(CURDIR, 'results')
+OUTPUT = join(RESULT_DIR, 'output.xml')
+
 def check_tests(test_file_path):
-    output_path = _run_tests_and_statuschecker(test_file_path)
-    result, checker = ExecutionResult(output_path), StatusCheckerChecker()
+    _run_tests_and_statuschecker(test_file_path)
+    result = ExecutionResult(OUTPUT)
+    checker = StatusCheckerChecker()
     result.visit(checker)
     if checker.errors:
         checker.print_errors()
@@ -34,27 +42,14 @@ def check_tests(test_file_path):
     sys.exit(0)
 
 def _run_tests_and_statuschecker(test_file_path):
-    (test_file_path, curdir,
-     status_checker_path, output_path) = _get_paths(test_file_path)
-    _remove_old_files(curdir)
-    run(test_file_path, log='NONE', report='NONE', outputdir=curdir,
+    test_file_path = join(CURDIR, test_file_path)
+    if exists(RESULT_DIR):
+        rmtree(RESULT_DIR)
+    run(test_file_path, log='NONE', report='NONE', outputdir=RESULT_DIR,
         loglevel='DEBUG')
-    call(['python', status_checker_path, output_path])
-    rebot(output_path, outputdir=curdir)
-    return output_path
+    call(['python', STATUSCHECKER_PATH, OUTPUT])
+    rebot(OUTPUT)
 
-def _get_paths(test_file_path):
-    curdir = dirname(abspath(__file__))
-    return (join(curdir, test_file_path),
-            curdir,
-            join(dirname(curdir), 'robotstatuschecker.py'),
-            join(curdir, 'output.xml'))
-
-def _remove_old_files(target_dir):
-    for path in ['report.html', 'log.html', 'output.xml']:
-        path = join(target_dir, path)
-        if exists(path):
-            remove(path)
 
 class StatusCheckerChecker(ResultVisitor):
 
@@ -63,39 +58,24 @@ class StatusCheckerChecker(ResultVisitor):
 
     def visit_test(self, test):
         kws = test.keywords[0].keywords
-        self.check(test.name, test.status, kws[0].messages[0].message,
-                   test.message, kws[1].messages[0].message)
-
-    def check(self, test_name, test_status, expected_status, test_message,
-              expected_message):
-        msg = self._check_status(test_name, test_status, expected_status)
-        msg = self._check_messages(msg, test_name, test_message,
-                                   expected_message)
+        err = (self._check_status(test.status, kws[0].messages[0].message),
+               self._check_messages(test.message, kws[1].messages[0].message))
+        msg = ''
+        if err[0]:
+            msg += 'Test "%s" has non-matching status.\n' % test.name
+        if err[1]:
+            msg += 'Test "%s" has non-matching messages.\n'  % test.name
         if msg:
             self.errors.append(msg)
+                
+    def _check_status(self, test_status, expected_status):
+        return test_status != expected_status
 
-    def _check_status(self, test_name, test_status, expected_status):
-        msg = ''
-        if expected_status == 'FAIL':
-            if test_status != expected_status:
-                msg = 'Test "%s" should have failed but passed.' % test_name
-        else:
-            if test_status != expected_status:
-                msg = 'Test "%s" should have passed but failed.' % test_name
-        return msg
-
-    def _check_messages(self, msg, test_name, test_message, expected_message):
-        if test_message != expected_message:
-            if not msg:
-                prefix = 'Test "%s" ' % test_name
-            else:
-                prefix = '\n\nAlso, test '
-            msg += prefix + 'does not have correct messages:\n\n"%s"\n!=\n"%s"'\
-                            % (test_message, expected_message)
-        return msg if msg else ''
+    def _check_messages(self, test_message, expected_message):
+        return test_message != expected_message
 
     def print_errors(self):
-        print '\n%s' % '\n------\n'.join(self.errors)
+        print '\n======\nERRORS\n======\n\n%s' % '------\n'.join(self.errors)
 
 
 if __name__ == '__main__':

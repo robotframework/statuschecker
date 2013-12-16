@@ -6,6 +6,7 @@
 test/log.html
 test/output.xml
 test/report.html
+test/results
 dist/
 build/
 *egg-info
