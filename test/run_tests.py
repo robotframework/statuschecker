@@ -16,45 +16,87 @@
 
 import sys
 
-from xml.etree.ElementTree import ElementTree
+from os import remove
+from os.path import abspath, dirname, exists, join
 from subprocess import call
 
-COMMANDS = [
-    'pybot --loglevel DEBUG --log NONE --report NONE example.txt'.split(),
-    'python ../robotstatuschecker.py output.xml'.split(),
-    'rebot output.xml'.split()
-]
+from robot import run, rebot
+from robot.api import ExecutionResult, ResultVisitor
 
-class StatusCheckerChecker():
+def check_tests(test_file_path):
+    output_path = _run_tests_and_statuschecker(test_file_path)
+    result, checker = ExecutionResult(output_path), StatusCheckerChecker()
+    result.visit(checker)
+    if checker.errors:
+        checker.print_errors()
+        sys.exit(len(checker.errors))
+    print '\nTests for StatusChecker have completed successfully.'
+    sys.exit(0)
+
+def _run_tests_and_statuschecker(test_file_path):
+    (test_file_path, curdir,
+     status_checker_path, output_path) = _get_paths(test_file_path)
+    _remove_old_files(curdir)
+    run(test_file_path, log='NONE', report='NONE', outputdir=curdir,
+        loglevel='DEBUG')
+    call(['python', status_checker_path, output_path])
+    rebot(output_path, outputdir=curdir)
+    return output_path
+
+def _get_paths(test_file_path):
+    curdir = dirname(abspath(__file__))
+    return (join(curdir, test_file_path),
+            curdir,
+            join(dirname(curdir), 'robotstatuschecker.py'),
+            join(curdir, 'output.xml'))
+
+def _remove_old_files(target_dir):
+    for path in ['report.html', 'log.html', 'output.xml']:
+        path = join(target_dir, path)
+        if exists(path):
+            remove(path)
+
+class StatusCheckerChecker(ResultVisitor):
 
     def __init__(self):
-        pass
+        self.errors = []
 
-    def check_tests(self):
-        for cmd in COMMANDS:
-            call(cmd)
-        xml = ElementTree(file='output.xml')
-        errors = self.check_and_return_errors(xml)
-        if errors:
-            sys.exit('\nTests for StatusChecker have failed:\n\n%s'
-                     % '\n'.join(errors))
-        print '\nTests for StatusChecker have completed successfully.'
-        sys.exit(0)
+    def visit_test(self, test):
+        kws = test.keywords[0].keywords
+        self.check(test.name, test.status, kws[0].messages[0].message,
+                   test.message, kws[1].messages[0].message)
 
-    def check_and_return_errors(self, xml):
-        errors = []
-        for test_element in xml.iter('test'):
-            name, status = self._get_name_and_status(test_element)
-            if name.startswith('FAILURE:'):
-                if status != 'FAIL':
-                    errors.append('Test "%s" should have failed but passed' % name)
-            elif status != 'PASS':
-                errors.append('Test "%s" should have passed but failed' % name)
-        return errors
+    def check(self, test_name, test_status, expected_status, test_message,
+              expected_message):
+        msg = self._check_status(test_name, test_status, expected_status)
+        msg = self._check_messages(msg, test_name, test_message,
+                                   expected_message)
+        if msg:
+            self.errors.append(msg)
 
-    def _get_name_and_status(self, test_element):
-        return (test_element.attrib['name'],
-                test_element.find('status').attrib['status'])
+    def _check_status(self, test_name, test_status, expected_status):
+        msg = ''
+        if expected_status == 'FAIL':
+            if test_status != expected_status:
+                msg = 'Test "%s" should have failed but passed.' % test_name
+        else:
+            if test_status != expected_status:
+                msg = 'Test "%s" should have passed but failed.' % test_name
+        return msg
+
+    def _check_messages(self, msg, test_name, test_message, expected_message):
+        if test_message != expected_message:
+            if not msg:
+                prefix = 'Test "%s" ' % test_name
+            else:
+                prefix = '\n\nAlso, test '
+            msg += prefix + 'does not have correct messages:\n\n"%s"\n!=\n"%s"'\
+                            % (test_message, expected_message)
+        return msg if msg else ''
+
+    def print_errors(self):
+        print '\n%s' % '\n------\n'.join(self.errors)
+
 
 if __name__ == '__main__':
-    StatusCheckerChecker().check_tests()
+    check_tests('example.txt')
