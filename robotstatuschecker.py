@@ -16,12 +16,19 @@
 
 """Robot Framework Test Status Checker
 
-Usage:  statuschecker.py infile [outfile]
+Command-line usage:
+
+    python -m robotstatuschecker infile [outfile]
+
+Programmatical usage:
+
+    from robotstatuschecker import process_output
+    process_output('infile.xml', 'outfile.xml')
 
 This tool processes Robot Framework output XML files and checks that test case
 statuses and messages are as expected. Main use case is post-processing output
 files got when testing Robot Framework test libraries using Robot Framework
-itself. The tool assumes that Robot Framework is installed to the system.
+itself. The tool assumes that Robot Framework is installed on the system.
 
 If output file is not given, the input file is considered to be also output
 file and it is edited in place.
@@ -34,57 +41,47 @@ expression by prefixing it with string 'REGEXP:'. Testing only the beginning
 of the message is possible with 'STARTS:' prefix.
 
 This tool also allows testing the created log messages. They are specified
-using a syntax 'LOG x.y:z LEVEL Actual message', which is described in detail
-detail in the tool documentation.
+using format 'LOG x.y:z LEVEL Actual message', which is described in detail
+in the tool documentation.
 """
 
 import re
 import sys
 from os.path import abspath
+
 from robot.api import ExecutionResult, ResultVisitor
 
-class _Expected(object):
 
-    def __init__(self, doc):
-        self.status, self.message = self._get_status_and_message(doc)
-        self.logs = self._get_logs(doc)
+def process_output(inpath, outpath=None, verbose=True):
+    """Programmatic entry point to Status Checker.
 
-    def _get_status_and_message(self, doc):
-        if 'FAIL' in doc:
-            return 'FAIL', doc.split('FAIL', 1)[1].split('LOG', 1)[0].strip()
-        return 'PASS', ''
+    When verbose is True, prints the paths to inpath and outpath.
+    """
+    if verbose:
+        print 'Checking %s' % abspath(inpath)
+    result = StatusChecker(inpath, outpath).process_output()
+    if verbose and outpath:
+        print 'Output: %s' % abspath(outpath)
+    return result.return_code
 
-    def _get_logs(self, doc):
-        logs = []
-        for item in doc.split('LOG')[1:]:
-            index_str, msg_str = item.strip().split(' ', 1)
-            kw_indices, msg_index = self._get_indices(index_str)
-            level, message = self._get_log_message(msg_str)
-            logs.append((kw_indices, msg_index, level, message))
-        return logs
 
-    def _get_indices(self, index_str):
-        try:
-            kw_indices, msg_index = index_str.split(':')
-        except ValueError:
-            kw_indices, msg_index = index_str, '1'
-        kw_indices = [int(index) - 1 for index in kw_indices.split('.')]
-        return kw_indices, int(msg_index) - 1
+class StatusChecker(object):
 
-    def _get_log_message(self, msg_str):
-        try:
-            level, message = msg_str.split(' ', 1)
-            if level not in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL']:
-                raise ValueError
-        except ValueError:
-            level, message = 'INFO', msg_str
-        return level, message
+    def __init__(self, inpath, outpath=None):
+        self._inpath = inpath
+        self._outpath = outpath
+
+    def process_output(self):
+        result = ExecutionResult(self._inpath)
+        result.visit(StatusCheckerVisitor())
+        result.save(self._outpath)
+        return result
 
 
 class StatusCheckerVisitor(ResultVisitor):
 
     def visit_test(self, test):
-        expected = _Expected(test.doc)
+        expected = Expected(test.doc)
         self._check_status(test, expected)
         if test.status == 'PASS':
             self._check_logs(test, expected)
@@ -163,22 +160,51 @@ class StatusCheckerVisitor(ResultVisitor):
         return False
 
 
-def process_output(inpath, outpath=None):
-    print 'Checking %s' % abspath(inpath)
-    result = ExecutionResult(inpath)
-    result.visit(StatusCheckerVisitor())
-    result.save(outpath)
-    if outpath:
-        print 'Output: %s' % abspath(outpath)
-    return result.return_code
+class Expected(object):
+
+    def __init__(self, doc):
+        self.status, self.message = self._get_status_and_message(doc)
+        self.logs = self._get_logs(doc)
+
+    def _get_status_and_message(self, doc):
+        if 'FAIL' in doc:
+            return 'FAIL', doc.split('FAIL', 1)[1].split('LOG', 1)[0].strip()
+        return 'PASS', ''
+
+    def _get_logs(self, doc):
+        logs = []
+        for item in doc.split('LOG')[1:]:
+            index_str, msg_str = item.strip().split(' ', 1)
+            kw_indices, msg_index = self._get_indices(index_str)
+            level, message = self._get_log_message(msg_str)
+            logs.append((kw_indices, msg_index, level, message))
+        return logs
+
+    def _get_indices(self, index_str):
+        try:
+            kw_indices, msg_index = index_str.split(':')
+        except ValueError:
+            kw_indices, msg_index = index_str, '1'
+        kw_indices = [int(index) - 1 for index in kw_indices.split('.')]
+        return kw_indices, int(msg_index) - 1
+
+    def _get_log_message(self, msg_str):
+        try:
+            level, message = msg_str.split(' ', 1)
+            if level not in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL']:
+                raise ValueError
+        except ValueError:
+            level, message = 'INFO', msg_str
+        return level, message
+
 
 if __name__=='__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
         print __doc__
-        sys.exit(0)
+        sys.exit(251)
     try:
         rc = process_output(*sys.argv[1:])
     except TypeError:
         print __doc__
-        sys.exit(1)
+        sys.exit(252)
     sys.exit(rc)
