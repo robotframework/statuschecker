@@ -11,11 +11,6 @@ from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
 
 
-CURDIR = dirname(abspath(__file__))
-STATUSCHECKER = join(dirname(CURDIR), 'robotstatuschecker.py')
-RESULTS = join(CURDIR, 'results')
-
-
 def check_tests(test_file_path):
     output = _run_tests_and_statuschecker(test_file_path)
     result = ExecutionResult(output)
@@ -25,14 +20,15 @@ def check_tests(test_file_path):
     sys.exit(len(checker.errors))
 
 def _run_tests_and_statuschecker(test_file):
-    test_file = join(CURDIR, test_file)
-    output = join(RESULTS, 'output.xml')
-    if exists(RESULTS):
-        rmtree(RESULTS)
-    run(test_file, log='NONE', report='NONE', outputdir=RESULTS,
+    curdir = dirname(abspath(__file__))
+    results = join(curdir, 'results')
+    output = join(results, 'output.xml')
+    if exists(results):
+        rmtree(results)
+    run(join(curdir, test_file), output=output, log=None, report=None,
         loglevel='DEBUG')
-    call(['python', STATUSCHECKER, output])
-    rebot(output, outputdir=RESULTS)
+    call(['python', join(dirname(curdir), 'robotstatuschecker.py'), output])
+    rebot(output, outputdir=results)
     return output
 
 
