@@ -21,7 +21,8 @@ The easiest way to install StatusChecker is by using `pip`_:
 
     $ pip install robotstatuschecker
 
-Alternatively you can either download and extract the `source distribution`_ manually or `clone the project`_, and install the tool using:
+Alternatively you can either download and extract the `source distribution`_ 
+manually or `clone the project`_, and install the tool using:
 
 .. sourcecode :: bash
 
