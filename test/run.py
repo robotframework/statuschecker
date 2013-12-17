@@ -13,7 +13,7 @@ from robot.api import ExecutionResult, ResultVisitor
 
 CURDIR = dirname(abspath(__file__))
 STATUSCHECKER = join(dirname(CURDIR), 'robotstatuschecker.py')
-RESULT_DIR = join(CURDIR, 'results')
+RESULTS = join(CURDIR, 'results')
 
 
 def check_tests(test_file_path):
@@ -26,13 +26,13 @@ def check_tests(test_file_path):
 
 def _run_tests_and_statuschecker(test_file):
     test_file = join(CURDIR, test_file)
-    output = join(RESULT_DIR, 'output.xml')
-    if exists(RESULT_DIR):
-        rmtree(RESULT_DIR)
-    run(test_file, log='NONE', report='NONE', outputdir=RESULT_DIR,
+    output = join(RESULTS, 'output.xml')
+    if exists(RESULTS):
+        rmtree(RESULTS)
+    run(test_file, log='NONE', report='NONE', outputdir=RESULTS,
         loglevel='DEBUG')
     call(['python', STATUSCHECKER, output])
-    rebot(output)
+    rebot(output, outputdir=RESULTS)
     return output
 
 
