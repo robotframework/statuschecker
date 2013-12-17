@@ -69,7 +69,6 @@ FAILURE: Wrong Log Level
     Log  Hello world!  DEBUG
 
 
-
 *** Keywords ***
 Logging User Keyword
     Log  User Keyword  DEBUG
