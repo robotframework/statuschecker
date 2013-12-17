@@ -10,13 +10,11 @@ Topic :: Software Development :: Testing
 
 import sys
 
+from distutils.core import setup
 from os.path import abspath, dirname
-from setuptools import setup
 
 sys.path.insert(0, dirname(abspath(__file__)))
 from robotstatuschecker import __version__
-
-print __version__
 
 setup(
     name             = 'robotstatuschecker',
