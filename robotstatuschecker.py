@@ -45,7 +45,7 @@ using format 'LOG x.y:z LEVEL Actual message', which is described in detail
 in the tool documentation.
 """
 
-__version__ = '1.0'
+__version__ = '1.0-devel'
 
 import re
 import sys
