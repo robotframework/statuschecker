@@ -1,4 +1,4 @@
-#!/usr/env python
+#!/usr/bin/env python
 
 import sys
 
@@ -12,57 +12,65 @@ from robot.api import ExecutionResult, ResultVisitor
 
 
 CURDIR = dirname(abspath(__file__))
-STATUSCHECKER_PATH = join(dirname(CURDIR), 'robotstatuschecker.py')
+STATUSCHECKER = join(dirname(CURDIR), 'robotstatuschecker.py')
 RESULT_DIR = join(CURDIR, 'results')
-OUTPUT = join(RESULT_DIR, 'output.xml')
+
 
 def check_tests(test_file_path):
-    _run_tests_and_statuschecker(test_file_path)
-    result = ExecutionResult(OUTPUT)
+    output = _run_tests_and_statuschecker(test_file_path)
+    result = ExecutionResult(output)
     checker = StatusCheckerChecker()
     result.visit(checker)
-    if checker.errors:
-        checker.print_errors()
-        sys.exit(len(checker.errors))
-    print '\nTests for StatusChecker have completed successfully.'
-    sys.exit(0)
+    checker.print_status()
+    sys.exit(len(checker.errors))
 
-def _run_tests_and_statuschecker(test_file_path):
-    test_file_path = join(CURDIR, test_file_path)
+def _run_tests_and_statuschecker(test_file):
+    test_file = join(CURDIR, test_file)
+    output = join(RESULT_DIR, 'output.xml')
     if exists(RESULT_DIR):
         rmtree(RESULT_DIR)
-    run(test_file_path, log='NONE', report='NONE', outputdir=RESULT_DIR,
+    run(test_file, log='NONE', report='NONE', outputdir=RESULT_DIR,
         loglevel='DEBUG')
-    call(['python', STATUSCHECKER_PATH, OUTPUT])
-    rebot(OUTPUT)
+    call(['python', STATUSCHECKER, output])
+    rebot(output)
+    return output
 
 
 class StatusCheckerChecker(ResultVisitor):
 
     def __init__(self):
         self.errors = []
+        self.tests = 0
 
     def visit_test(self, test):
-        kws = test.keywords[0].keywords
-        err = (self._check_status(test.status, kws[0].messages[0].message),
-               self._check_messages(test.message, kws[1].messages[0].message))
-        msg = ''
-        if err[0]:
-            msg += 'Test "%s" has non-matching status.\n' % test.name
-        if err[1]:
-            msg += 'Test "%s" has non-matching messages.\n'  % test.name
-        if msg:
-            self.errors.append(msg)
-                
-    def _check_status(self, test_status, expected_status):
-        return test_status != expected_status
+        self.tests += 1
+        status, message = self._get_expected(test)
+        errors = [self._verify(test.status, status, 'status'),
+                  self._verify(test.message, message, 'message')]
+        errors = ['- %s' % e for e in errors if e]
+        if errors:
+            self.errors.append('%s:\n%s' % (test.name, '\n'.join(errors)))
 
-    def _check_messages(self, test_message, expected_message):
-        return test_message != expected_message
+    def _get_expected(self, test):
+        kw = test.keywords[0]
+        assert kw.name == 'Status'
+        return (kw.keywords[0].messages[0].message,
+                kw.keywords[1].messages[0].message)
 
-    def print_errors(self):
-        print '\n======\nERRORS\n======\n\n%s' % '------\n'.join(self.errors)
+    def _verify(self, actual, expected, explanation):
+        if actual == expected:
+            return ''
+        return ('Expected %s to be "%s" but it was "%s".'
+                % (explanation, expected, actual))
+
+    def print_status(self):
+        print
+        if self.errors:
+            print '%d/%d test failed:' % (len(self.errors), self.tests)
+            print '\n-------------------------------------\n'.join(self.errors)
+        else:
+            print 'All %d tests passed/failed/logged as expected.' % self.tests
 
 
 if __name__ == '__main__':
-    check_tests('example.txt')
+    check_tests('tests.txt')
