@@ -53,7 +53,7 @@ class StatusCheckerChecker(ResultVisitor):
 
     def _get_expected(self, test):
         kw = test.keywords[0]
-        assert kw.name == 'Status'
+        assert kw.name == 'Status', "No 'Status' keyword found."
         return (kw.keywords[0].messages[0].message,
                 kw.keywords[1].messages[0].message)
 
@@ -73,4 +73,4 @@ class StatusCheckerChecker(ResultVisitor):
 
 
 if __name__ == '__main__':
-    check_tests('tests.txt')
+    check_tests('tests.robot')
