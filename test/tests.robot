@@ -48,6 +48,12 @@ Log messages deeper
     Logging User Keyword
     Logging User Keyword 2
 
+NONE log message
+    [Documentation]    LOG 2 NONE LOG 2:1 NONE LOG 3:1 Message LOG 3:2 NONE
+    Status    PASS
+    No Operation
+    Log    Message
+
 Expected FAIL and log messages
     [Documentation]    This text is ignored. FAIL Told ya!!
     ...    LOG 2 Failing soon!
@@ -63,8 +69,8 @@ Expected PASS and log messages
     [Documentation]    This text is ignored. PASS Told ya!!
     ...    LOG 2 Passing soon!
     ...    LOG 3 Any time now...
-    ...    LOG 4 Execution passed with message:
-    ...    Told ya!!
+    ...    LOG 4:1 Execution passed with message:\nTold ya!!
+    ...    LOG 4:2 NONE
     Status    PASS    Told ya!!
     Log    Passing soon!
     Log    Any time now...
