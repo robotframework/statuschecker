@@ -112,27 +112,27 @@ documentation using a syntax such as::
    LOG x.y:z LEVEL Actual message
 
 The part before the colon is the number of the keyword to check. For
-example *1* means first keyword, *1.2* is the second child
+example ``1`` means first keyword, ``1.2`` is the second child
 keyword of the first keyword, and so on.
 
 The part after the colon denotes the number of the message. For
-example *1:2* means the second message of the first keyword and
-*1.2:3* is the third message of the second child keyword of the
-first keyword. The message index is optional and defaults to *1*.
+example ``1:2`` means the second message of the first keyword and
+``1.2:3`` is the third message of the second child keyword of the
+first keyword. The message index is optional and defaults to ``1``.
 
 Message level is specified before the actual message, and it can be
 any of the valid log levels in capital letters. If the level is not
-given it defaults to *INFO*.
+given it defaults to ``INFO``.
 
 This syntax can be used multiple times to test multiple messages.  It
 also works together with specifying the expected error message with
-*FAIL*, but it that case *FAIL* and the expected error must
+``FAIL``, but it that case ``FAIL`` and the expected error must
 be first.
 
 The log message can also be given as a regular expression pattern the
 same way as the `expected error message`__. Finally, to check that a
 keyword does not have a certain message, it is possible to use
-*NONE* in the place of the message.
+``NONE`` in the place of the message.
 
 __ `Defining expected test status`_
 
