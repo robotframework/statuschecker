@@ -112,14 +112,14 @@ FAILURE: Wrong message
 
 FAILURE: Wrong log message
     [Documentation]    LOG 2 Hello world!
-    Status    FAIL    Wrong content for message 1 of keyword 'BuiltIn.Log'.\n\n
+    Status    FAIL    Keyword 'BuiltIn.Log' (index 2) message 1 has wrong content.\n\n
     ...    Expected:\nHello world!\n\n
     ...    Actual:\nHi world!
     Log    Hi world!
 
 FAILURE: Wrong log level
     [Documentation]    LOG 2.1 Hello world!
-    Status    FAIL    Wrong level for message 1 of keyword 'BuiltIn.Log'.\n\n
+    Status    FAIL    Keyword 'BuiltIn.Log' (index 2.1) message 1 has wrong level.\n\n
     ...    Expected: INFO\n
     ...    Actual: DEBUG
     Logging User Keyword

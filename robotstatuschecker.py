@@ -240,7 +240,7 @@ class LogMessageChecker(BaseChecker):
     def _check_msg_level(self, test, kw, msg, expected):
         condition = msg.level == expected.level
         message = ("Keyword '%s' (index %s) message %s has wrong level.\n\n"
-                   "Expected %s:\nActual: %s"
+                   "Expected: %s\nActual: %s"
                    % (kw.name, expected.kw_index_str, expected.msg_index_str,
                       expected.level, msg.level))
         return self._assert(condition, test, message)
