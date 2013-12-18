@@ -113,6 +113,22 @@ FAILURE: Wrong log level
     ...    Actual: DEBUG.\nHello world!
     Log    Hello world!    DEBUG
 
+FAILURE: Unexpected log message
+    [Documentation]    LOG 2 NONE
+    Status    FAIL    Wrong content for message 1 of keyword 'BuiltIn.Log'.\n\n
+    ...    Expected:\nNONE\n\n
+    ...    Actual:\nUnexpected message
+    Log    Unexpected message
+
+FAILURE: Non-existing keyword
+    [Documentation]    LOG 2 No keyword here
+    Status    FAIL    No keyword with index '2'.
+
+FAILURE: Non-existing log message
+    [Documentation]    LOG 2:2 No message here
+    Status    FAIL    Keyword 'BuiltIn.Log' (index 2) does not have message 2.
+    Log    Message
+
 *** Keywords ***
 Logging User Keyword
     Log    User Keyword    DEBUG

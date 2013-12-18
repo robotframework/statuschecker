@@ -126,16 +126,17 @@ class StatusCheckerVisitor(ResultVisitor):
                 for index in kw_indices[1:]:
                     kw = kw.keywords[index]
             except IndexError:
-                indices = '.'.join(str(i+1) for i in kw_indices)
+                index = '.'.join(str(i+1) for i in kw_indices)
                 test.status = 'FAIL'
-                test.message = ("Test '%s' does not have keyword with index '%s'"
-                                % (test.name, indices))
+                test.message = "No keyword with index '%s'." % index
                 return
             if len(kw.messages) <= msg_index:
                 if message != 'NONE':
+                    index = '.'.join(str(i+1) for i in kw_indices)
                     test.status = 'FAIL'
-                    test.message = ("Keyword '%s' should have had at least %d "
-                                    "messages" % (kw.name, msg_index+1))
+                    test.message = ("Keyword '%s' (index %s) does not have "
+                                    "message %d."
+                                    % (kw.name, index, msg_index+1))
             else:
                 if self._check_log_level(level, test, kw, msg_index):
                     self._check_log_message(message, test, kw, msg_index)
