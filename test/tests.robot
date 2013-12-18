@@ -76,26 +76,35 @@ FAILURE: Unexpected PASS
     No Operation
 
 FAILURE: Wrong PASS message
-    Status    FAIL    Wrong error message.\n\nExpected:\n\n\nActual:\nUnexpected message\n
+    Status    FAIL    Wrong error message.\n\n
+    ...    Expected:\n\n\n
+    ...    Actual:\nUnexpected message\n
     Pass Execution    Unexpected message
 
 FAILURE: Unexpected FAIL
-    Status    FAIL    Test was expected to PASS but it FAILED. Error message:\nUnexpected error message
+    Status    FAIL    Test was expected to PASS but it FAILED. Error message:\n
+    ...    Unexpected error message
     Fail    Unexpected error message
 
 FAILURE: Wrong message
     [Documentation]    FAIL Expected failure
-    Status    FAIL    Wrong error message.\n\nExpected:\nExpected failure\n\nActual:\nNot the expected message\n
+    Status    FAIL    Wrong error message.\n\n
+    ...    Expected:\nExpected failure\n\n
+    ...    Actual:\nNot the expected message\n
     Fail    Not the expected message
 
 FAILURE: Wrong log message
     [Documentation]    LOG 2 Hello world!
-    Status    FAIL    Wrong content for message 1 of keyword 'BuiltIn.Log'.\n\nExpected:\nHello world!\n\nActual:\nHi world!
+    Status    FAIL    Wrong content for message 1 of keyword 'BuiltIn.Log'.\n\n
+    ...    Expected:\nHello world!\n\n
+    ...    Actual:\nHi world!
     Log    Hi world!
 
 FAILURE: Wrong log level
     [Documentation]    LOG 2 Hello world!
-    Status    FAIL    Wrong level for message 1 of keyword 'BuiltIn.Log'.\n\nExpected: INFO\nActual: DEBUG.\nHello world!
+    Status    FAIL    Wrong level for message 1 of keyword 'BuiltIn.Log'.\n\n
+    ...    Expected: INFO\n
+    ...    Actual: DEBUG.\nHello world!
     Log    Hello world!    DEBUG
 
 *** Keywords ***
@@ -106,6 +115,7 @@ Logging User Keyword 2
     Log Many    User    Keyword
 
 Status
-    [Arguments]    ${status}    ${message}=
+    [Arguments]    ${status}    @{message}
+    ${message} =    Catenate    SEPARATOR=    @{message}
     Log    ${status}
     Log    ${message}

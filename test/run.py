@@ -50,8 +50,8 @@ class StatusCheckerChecker(ResultVisitor):
     def _get_expected(self, test):
         kw = test.keywords[0]
         assert kw.name == 'Status', "No 'Status' keyword found."
-        return (kw.keywords[0].messages[0].message,
-                kw.keywords[1].messages[0].message)
+        return (kw.keywords[1].messages[0].message,
+                kw.keywords[2].messages[0].message)
 
     def _verify(self, actual, expected, explanation):
         if actual == expected:
