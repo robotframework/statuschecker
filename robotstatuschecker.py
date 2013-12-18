@@ -67,7 +67,7 @@ def process_output(inpath, outpath=None, verbose=True):
     return result.return_code
 
 
-class StatusChecker(object):
+class StatusChecker(ResultVisitor):
 
     def __init__(self, inpath, outpath=None):
         self._inpath = inpath
@@ -75,36 +75,71 @@ class StatusChecker(object):
 
     def process_output(self):
         result = ExecutionResult(self._inpath)
-        result.visit(StatusCheckerVisitor())
+        result.suite.visit(self)
         result.save(self._outpath)
         return result
 
-
-class StatusCheckerVisitor(ResultVisitor):
-
     def visit_test(self, test):
         expected = Expected(test.doc)
-        self._check_status(test, expected)
-        if test.status == 'PASS':
-            self._check_logs(test, expected)
+        if TestStatusChecker(expected).check(test):
+            LogMessageChecker(expected).check(test)
 
-    def _check_status(self, test, exp):
-        if exp.status != test.status:
-            test.status = 'FAIL'
-            if exp.status == 'PASS':
-                test.message = ('Test was expected to PASS but it FAILED. '
-                                'Error message:\n') + test.message
-            else:
-                test.message = ('Test was expected to FAIL but it PASSED. '
-                                'Expected message:\n') + exp.message
-        elif not self._message_matches(test.message, exp.message):
-            test.status = 'FAIL'
-            test.message = ('Wrong error message.\n\n'
-                            'Expected:\n%s\n\nActual:\n%s\n' % (exp.message,
-                                                                test.message))
-        elif test.status == 'FAIL':
-            test.status = 'PASS'
-            test.message = 'Original test failed as expected.'
+    def visit_keyword(self, kw):
+        pass
+
+
+class Expected(object):
+
+    def __init__(self, doc):
+        self.status = self._get_status(doc)
+        self.message = self._get_message(doc)
+        self.logs = self._get_logs(doc)
+
+    def _get_status(self, doc):
+        return 'FAIL' if 'FAIL' in doc else 'PASS'
+
+    def _get_message(self, doc):
+        if 'FAIL' not in doc and 'PASS' not in doc:
+            return ''
+        status = self._get_status(doc)
+        return doc.split(status, 1)[1].split('LOG', 1)[0].strip()
+
+    def _get_logs(self, doc):
+        return [ExpectedLog(item) for item in doc.split('LOG')[1:]]
+
+
+class ExpectedLog(object):
+
+    def __init__(self, doc):
+        index, message = doc.strip().split(' ', 1)
+        self.kw_index, self.msg_index = self._split_index(index)
+        self.level, self.message = self._split_level(message)
+
+    @property
+    def kw_index_str(self):
+        return '.'.join(str(index + 1) for index in self.kw_index)
+
+    @property
+    def msg_index_str(self):
+        return str(self.msg_index + 1)
+
+    def _split_index(self, index):
+        if ':' in index:
+            kw_index, msg_index = index.split(':')
+        else:
+            kw_index, msg_index = index, 1
+        kw_index = [int(index) - 1 for index in kw_index.split('.')]
+        msg_index = int(msg_index) - 1
+        return kw_index, msg_index
+
+    def _split_level(self, message):
+        for level in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL']:
+            if message.startswith(level):
+                return level, message[len(level):].strip()
+        return 'INFO', message
+
+
+class BaseChecker(object):
 
     def _message_matches(self, actual, expected):
         if actual == expected:
@@ -119,91 +154,96 @@ class StatusCheckerVisitor(ResultVisitor):
                 return True
         return False
 
-    def _check_logs(self, test, exp):
-        for kw_indices, msg_index, level, message in exp.logs:
-            try:
-                kw = test.keywords[kw_indices[0]]
-                for index in kw_indices[1:]:
-                    kw = kw.keywords[index]
-            except IndexError:
-                index = '.'.join(str(i+1) for i in kw_indices)
-                test.status = 'FAIL'
-                test.message = "No keyword with index '%s'." % index
-                return
-            if len(kw.messages) <= msg_index:
-                if message != 'NONE':
-                    index = '.'.join(str(i+1) for i in kw_indices)
-                    test.status = 'FAIL'
-                    test.message = ("Keyword '%s' (index %s) does not have "
-                                    "message %d."
-                                    % (kw.name, index, msg_index+1))
-            else:
-                if self._check_log_level(level, test, kw, msg_index):
-                    self._check_log_message(message, test, kw, msg_index)
 
-    def _check_log_level(self, expected, test, kw, index):
-        actual = kw.messages[index].level
-        if actual == expected:
+class TestStatusChecker(BaseChecker):
+
+    def __init__(self, expected):
+        self.status = expected.status
+        self.message = expected.message
+
+    def check(self, test):
+        if self._check_status(test):
+            return self._check_message(test)
+
+    def _check_status(self, test):
+        if test.status == self.status:
             return True
         test.status = 'FAIL'
-        test.message = ("Wrong level for message %d of keyword '%s'.\n\n"
-                        "Expected: %s\nActual: %s.\n%s"
-                        % (index+1, kw.name, expected,
-                           actual, kw.messages[index].message))
-        return False
-
-    def _check_log_message(self, expected, test, kw, index):
-        actual = kw.messages[index].message.strip()
-        if self._message_matches(actual, expected):
-            return True
-        test.status = 'FAIL'
-        test.message = ("Wrong content for message %d of keyword '%s'.\n\n"
-                        "Expected:\n%s\n\nActual:\n%s"
-                        % (index+1, kw.name, expected, actual))
-        return False
-
-
-class Expected(object):
-
-    def __init__(self, doc):
-        self.status, self.message = self._get_status_and_message(doc)
-        self.logs = self._get_logs(doc)
-
-    def _get_status_and_message(self, doc):
-        if 'FAIL' in doc:
-            status = 'FAIL'
-        elif 'PASS' in doc:
-            status = 'PASS'
+        if self.status == 'PASS':
+            test.message = ('Test was expected to PASS but it FAILED. '
+                            'Error message:\n%s' % test.message)
         else:
-            return 'PASS', ''
-        message = doc.split(status, 1)[1].split('LOG', 1)[0].strip()
-        return status, message
+            test.message = ('Test was expected to FAIL but it PASSED. '
+                            'Expected message:\n%s' % self.message)
+        return False
 
-    def _get_logs(self, doc):
-        logs = []
-        for item in doc.split('LOG')[1:]:
-            index_str, msg_str = item.strip().split(' ', 1)
-            kw_indices, msg_index = self._get_indices(index_str)
-            level, message = self._get_log_message(msg_str)
-            logs.append((kw_indices, msg_index, level, message))
-        return logs
+    def _check_message(self, test):
+        if not self._message_matches(test.message, self.message):
+            test.status = 'FAIL'
+            test.message = ('Wrong message.\n\nExpected:\n%s\n\nActual:\n%s\n'
+                            % (self.message, test.message))
+            return False
+        if test.status == 'FAIL':
+            test.status = 'PASS'
+            test.message = 'Original test failed as expected.'
+        return True
 
-    def _get_indices(self, index_str):
+
+class LogMessageChecker(BaseChecker):
+
+    def __init__(self, expected):
+        self.logs = expected.logs
+
+    def check(self, test):
+        for expected in self.logs:
+            kw = self._get_keyword(test, expected)
+            if kw:
+                self._check_message(test, kw, expected)
+
+    def _get_keyword(self, test, expected):
+        kw = None
         try:
-            kw_indices, msg_index = index_str.split(':')
-        except ValueError:
-            kw_indices, msg_index = index_str, '1'
-        kw_indices = [int(index) - 1 for index in kw_indices.split('.')]
-        return kw_indices, int(msg_index) - 1
+            for index in expected.kw_index:
+                kw = (kw or test).keywords[index]
+            return kw
+        except IndexError:
+            test.status = 'FAIL'
+            test.message = ("No keyword with index '%s'."
+                            % expected.kw_index_str)
+            return None
 
-    def _get_log_message(self, msg_str):
+    def _check_message(self, test, kw, expected):
         try:
-            level, message = msg_str.split(' ', 1)
-            if level not in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL']:
-                raise ValueError
-        except ValueError:
-            level, message = 'INFO', msg_str
-        return level, message
+            msg = kw.messages[expected.msg_index]
+        except IndexError:
+            if expected.message != 'NONE':
+                test.status = 'FAIL'
+                test.message = (
+                    "Keyword '%s' (index %s) does not have message %s."
+                    % (kw.name, expected.kw_index_str, expected.msg_index_str))
+        else:
+            if self._check_msg_level(test, kw, msg, expected):
+                self._check_msg_message(test, kw, msg, expected)
+
+    def _check_msg_level(self, test, kw, msg, expected):
+        if msg.level == expected.level:
+            return True
+        test.status = 'FAIL'
+        test.message = ("Wrong level for message %s of keyword '%s'.\n\n"
+                        "Expected: %s\nActual: %s"
+                        % (expected.msg_index_str, kw.name,
+                           expected.level, msg.level))
+        return False
+
+    def _check_msg_message(self, test, kw, msg, expected):
+        if self._message_matches(msg.message, expected.message):
+            return True
+        test.status = 'FAIL'
+        test.message = ("Wrong content for message %s of keyword '%s'.\n\n"
+                        "Expected:\n%s\n\nActual:\n%s"
+                        % (expected.msg_index_str, kw.name,
+                           expected.message, msg.message))
+        return False
 
 
 if __name__=='__main__':

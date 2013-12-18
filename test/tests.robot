@@ -1,3 +1,8 @@
+*** Settings ***
+Suite Setup        Log    Suite setup
+Suite Teardown     Log    Suite teardown
+
+
 *** Test Cases ***
 Implicit PASS
     Status    PASS
@@ -82,7 +87,7 @@ FAILURE: Unexpected PASS
     No Operation
 
 FAILURE: Wrong PASS message
-    Status    FAIL    Wrong error message.\n\n
+    Status    FAIL    Wrong message.\n\n
     ...    Expected:\n\n\n
     ...    Actual:\nUnexpected message\n
     Pass Execution    Unexpected message
@@ -94,7 +99,7 @@ FAILURE: Unexpected FAIL
 
 FAILURE: Wrong message
     [Documentation]    FAIL Expected failure
-    Status    FAIL    Wrong error message.\n\n
+    Status    FAIL    Wrong message.\n\n
     ...    Expected:\nExpected failure\n\n
     ...    Actual:\nNot the expected message\n
     Fail    Not the expected message
@@ -110,7 +115,7 @@ FAILURE: Wrong log level
     [Documentation]    LOG 2 Hello world!
     Status    FAIL    Wrong level for message 1 of keyword 'BuiltIn.Log'.\n\n
     ...    Expected: INFO\n
-    ...    Actual: DEBUG.\nHello world!
+    ...    Actual: DEBUG
     Log    Hello world!    DEBUG
 
 FAILURE: Unexpected log message
