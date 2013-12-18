@@ -3,8 +3,18 @@ Expected Pass
     Status    PASS
     No Operation
 
+Expected Pass With Message
+    [Documentation]    PASS    The message
+    Status    PASS    The message
+    Pass Execution    The message
+
 Expected Fail
-    [Documentation]  Texts before fail (in caps) is ignored. FAIL Expected failure
+    [Documentation]  FAIL Expected failure
+    Status    PASS    Original test failed as expected.
+    Fail  Expected failure
+
+Ignore Text Before Marker
+    [Documentation]  This text is ignored. FAIL Expected failure
     Status    PASS    Original test failed as expected.
     Fail  Expected failure
 
@@ -39,15 +49,34 @@ Log Messages Deeper
     Logging User Keyword 2
 
 Expected Failure And Log Message
-    [Documentation]  FAIL Failing now! LOG 2 Failing soon!
+    [Documentation]  This text is ignored. FAIL Told ya!!
+    ...  LOG 2 Failing soon!
+    ...  LOG 3 Any time now...
+    ...  LOG 4:1 FAIL Told ya!!
+    ...  LOG 4:2 DEBUG STARTS: Traceback
     Status    PASS    Original test failed as expected.
     Log  Failing soon!
-    Fail  Failing now!
+    Log  Any time now...
+    Fail  Told ya!!
+
+Expected Pass Message And Log Messages
+    [Documentation]  This text is ignored. PASS Told ya!!
+    ...  LOG 2 Passing soon!
+    ...  LOG 3 Any time now...
+    ...  LOG 4 Execution passed with message:\nTold ya!!
+    Status    PASS    Told ya!!
+    Log   Passing soon!
+    Log  Any time now...
+    Pass Execution    Told ya!!
 
 FAILURE: Unexpected Pass
     [Documentation]  FAIL Expected failure does not occur
     Status    FAIL    Test was expected to FAIL but it PASSED. Expected message:\nExpected failure does not occur
     No Operation
+
+FAILURE: Wrong Pass Message
+    Status    FAIL    Wrong error message.\n\nExpected:\n\n\nActual:\nUnexpected message\n
+    Pass Execution    Unexpected message
 
 FAILURE: Unexpected Fail
     Status    FAIL    Test was expected to PASS but it FAILED. Error message:\nUnexpected error message

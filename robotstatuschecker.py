@@ -170,8 +170,13 @@ class Expected(object):
 
     def _get_status_and_message(self, doc):
         if 'FAIL' in doc:
-            return 'FAIL', doc.split('FAIL', 1)[1].split('LOG', 1)[0].strip()
-        return 'PASS', ''
+            status = 'FAIL'
+        elif 'PASS' in doc:
+            status = 'PASS'
+        else:
+            return 'PASS', ''
+        message = doc.split(status, 1)[1].split('LOG', 1)[0].strip()
+        return status, message
 
     def _get_logs(self, doc):
         logs = []

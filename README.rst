@@ -57,17 +57,25 @@ Defining expected test status
 
 By default, all test cases are expected to *PASS* and have no
 message. Changing the expected status to *FAIL* is done by having
-the word *FAIL* (in uppercase) somewhere in the test case
+the word ``FAIL`` (in uppercase) somewhere in the test case
 documentation. The expected error message must then be given after
-*FAIL*.
+the ``FAIL`` text.
 
-The error message can also be specified as a regular expression by
-prefixing it with *REGEXP:*. The specified regular expression
+If a test is expected to *PASS* with a certain message, the word
+``PASS`` must be added to its documentation explicitly and the
+expected message given after that. This is a new feature in version
+1.1.
+
+The expected message can also be specified as a regular expression by
+prefixing it with ``REGEXP:``. The specified regular expression
 must match the error message fully. Having spaces between the status,
-the message or the possible regular expression prefix is optional.
+the message and the possible regular expression prefix is optional.
 
 It is also possible to test only the beginning of the error by
-prefixing the expected message with *STARTS:*.
+prefixing the expected message with ``STARTS:``.
+
+The following examples illustrate different ways to define test
+statuses and messages:
 
 .. sourcecode :: robotframework
 
@@ -76,13 +84,24 @@ prefixing the expected message with *STARTS:*.
         [Documentation]    FAIL Expected error message
         Steps
 
+    Exclude Documentation Before Marker
+        [Documentation]    This text is ignored FAIL Expected error message
+        Steps
+
     Regexp Example
         [Documentation]    FAIL REGEXP: (IOError|OSError): .*
         Steps
 
     Start Example
         [Documentation]    FAIL STARTS: IOError:
+        Steps
 
+    Passing Without Message
+        Steps
+
+    Passing With Message
+        [Documentation]    PASS Expected message
+        Steps
 
 Defining expected log messages
 ==============================
