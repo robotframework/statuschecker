@@ -154,6 +154,28 @@ class BaseChecker(object):
                 return True
         return False
 
+    def _assert(self, condition, test, message):
+        if not condition:
+            return self._fail(test, message)
+        return True
+
+    def _fail(self, test, message):
+        test.status = 'FAIL'
+        self._set_message(test, message)
+        return False
+
+    def _pass(self, test, message):
+        test.status = 'PASS'
+        self._set_message(test, message)
+        return True
+
+    def _set_message(self, test, message):
+        if test.message:
+            original = '\n\nOriginal message:\n%s' % test.message
+        else:
+            original = ''
+        test.message = message + original
+
 
 class TestStatusChecker(BaseChecker):
 
@@ -166,26 +188,17 @@ class TestStatusChecker(BaseChecker):
             return self._check_message(test)
 
     def _check_status(self, test):
-        if test.status == self.status:
-            return True
-        test.status = 'FAIL'
-        if self.status == 'PASS':
-            test.message = ('Test was expected to PASS but it FAILED. '
-                            'Error message:\n%s' % test.message)
-        else:
-            test.message = ('Test was expected to FAIL but it PASSED. '
-                            'Expected message:\n%s' % self.message)
-        return False
+        condition = test.status == self.status
+        message = ('Test was expected to %s but it %sED.'
+                   % (self.status, test.status))
+        return self._assert(condition, test, message)
 
     def _check_message(self, test):
         if not self._message_matches(test.message, self.message):
-            test.status = 'FAIL'
-            test.message = ('Wrong message.\n\nExpected:\n%s\n\nActual:\n%s\n'
-                            % (self.message, test.message))
-            return False
+            message = 'Wrong message.\n\nExpected:\n%s' % self.message
+            return self._fail(test, message)
         if test.status == 'FAIL':
-            test.status = 'PASS'
-            test.message = 'Original test failed as expected.'
+            return self._pass(test, 'Test failed as expected.')
         return True
 
 
@@ -207,9 +220,8 @@ class LogMessageChecker(BaseChecker):
                 kw = (kw or test).keywords[index]
             return kw
         except IndexError:
-            test.status = 'FAIL'
-            test.message = ("No keyword with index '%s'."
-                            % expected.kw_index_str)
+            message = "No keyword with index '%s'." % expected.kw_index_str
+            self._fail(test, message)
             return None
 
     def _check_message(self, test, kw, expected):
@@ -217,36 +229,32 @@ class LogMessageChecker(BaseChecker):
             msg = kw.messages[expected.msg_index]
         except IndexError:
             if expected.message != 'NONE':
-                test.status = 'FAIL'
-                test.message = (
+                message = (
                     "Keyword '%s' (index %s) does not have message %s."
                     % (kw.name, expected.kw_index_str, expected.msg_index_str))
+                self._fail(test, message)
         else:
             if self._check_msg_level(test, kw, msg, expected):
                 self._check_msg_message(test, kw, msg, expected)
 
     def _check_msg_level(self, test, kw, msg, expected):
-        if msg.level == expected.level:
-            return True
-        test.status = 'FAIL'
-        test.message = ("Wrong level for message %s of keyword '%s'.\n\n"
-                        "Expected: %s\nActual: %s"
-                        % (expected.msg_index_str, kw.name,
-                           expected.level, msg.level))
-        return False
+        condition = msg.level == expected.level
+        message = ("Wrong level for message %s of keyword '%s'.\n\n"
+                   "Expected: %s\nActual: %s"
+                   % (expected.msg_index_str, kw.name,
+                      expected.level, msg.level))
+        return self._assert(condition, test, message)
 
     def _check_msg_message(self, test, kw, msg, expected):
-        if self._message_matches(msg.message, expected.message):
-            return True
-        test.status = 'FAIL'
-        test.message = ("Wrong content for message %s of keyword '%s'.\n\n"
-                        "Expected:\n%s\n\nActual:\n%s"
-                        % (expected.msg_index_str, kw.name,
-                           expected.message, msg.message))
-        return False
+        condition = self._message_matches(msg.message, expected.message)
+        message = ("Wrong content for message %s of keyword '%s'.\n\n"
+                   "Expected:\n%s\n\nActual:\n%s"
+                   % (expected.msg_index_str, kw.name,
+                      expected.message, msg.message))
+        return self._assert(condition, test, message)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
         print __doc__
         sys.exit(251)

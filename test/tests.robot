@@ -15,22 +15,26 @@ Explicit PASS with message
 
 Expected FAIL
     [Documentation]    FAIL Expected failure
-    Status    PASS    Original test failed as expected.
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nExpected failure
     Fail    Expected failure
 
 Ignore documentation before marker
     [Documentation]    This text is ignored. FAIL Expected failure
-    Status    PASS    Original test failed as expected.
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nExpected failure
     Fail    Expected failure
 
 Expected FAIL with REGEXP
     [Documentation]    FAIL REGEXP: Pattern is here .* \\d+
-    Status    PASS    Original test failed as expected.
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nPattern is here whatever 123
     Fail    Pattern is here whatever 123
 
 Expected FAIL with STARTS
     [Documentation]    FAIL STARTS: This is start
-    Status    PASS    Original test failed as expected.
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nThis is start and this is end
     Fail    This is start and this is end
 
 Log message
@@ -65,7 +69,8 @@ Expected FAIL and log messages
     ...    LOG 3 Any time now...
     ...    LOG 4:1 FAIL Told ya!!
     ...    LOG 4:2 DEBUG STARTS: Traceback
-    Status    PASS    Original test failed as expected.
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nTold ya!!
     Log    Failing soon!
     Log    Any time now...
     Fail    Told ya!!
@@ -83,17 +88,18 @@ Expected PASS and log messages
 
 FAILURE: Unexpected PASS
     [Documentation]    FAIL Expected failure does not occur
-    Status    FAIL    Test was expected to FAIL but it PASSED. Expected message:\nExpected failure does not occur
+    Status    FAIL    Test was expected to FAIL but it PASSED.
     No Operation
 
 FAILURE: Wrong PASS message
     Status    FAIL    Wrong message.\n\n
     ...    Expected:\n\n\n
-    ...    Actual:\nUnexpected message\n
+    ...    Original message:\nUnexpected message
     Pass Execution    Unexpected message
 
 FAILURE: Unexpected FAIL
-    Status    FAIL    Test was expected to PASS but it FAILED. Error message:\n
+    Status    FAIL    Test was expected to PASS but it FAILED.\n\n
+    ...    Original message:\n
     ...    Unexpected error message
     Fail    Unexpected error message
 
@@ -101,7 +107,7 @@ FAILURE: Wrong message
     [Documentation]    FAIL Expected failure
     Status    FAIL    Wrong message.\n\n
     ...    Expected:\nExpected failure\n\n
-    ...    Actual:\nNot the expected message\n
+    ...    Original message:\nNot the expected message
     Fail    Not the expected message
 
 FAILURE: Wrong log message
