@@ -1,36 +1,37 @@
 StatusChecker
 =============
 
-StatusChecker is a tool for checking that `Robot Framework`__ test
-cases have expected statuses and log messages. You should have Robot
-Framework installed before using this tool.
+StatusChecker is a tool for checking that `Robot Framework`_ test
+cases have expected statuses and log messages. It is mainly useful for
+Robot Framework test library developers who want to use Robot
+Framework to also test their libraries.
 
-__ http://robotframework.org
+StatusChecker project is hosted in BitBucket_ and downloads are in
+PyPI_.
 
-StatusChecker processes Robot Framework output XML files and checks that
-test case statuses and messages are as expected. The main use case is
-post-processing output files got when testing Robot Framework test
-libraries using Robot Framework itself.
+.. _Robot Framework: http://robotframework.org
+.. _BitBucket: https://bitbucket.org/robotframework/statuschecker
+.. _PyPI: https://pypi.python.org/pypi/robotstatuschecker
 
 Installation instructions
 =========================
 
 The easiest way to install StatusChecker is by using `pip`_:
 
-.. sourcecode :: bash
+.. sourcecode:: bash
 
     $ pip install robotstatuschecker
 
-Alternatively you can either download and extract the `source distribution`_ 
-manually or `clone the project`_, and install the tool using:
+Alternatively you can get the code by cloning the project from
+BitBucket_ or downloading the source distribution from PyPI_ and
+extracting it. After that you can install the tool with:
 
-.. sourcecode :: bash
+.. sourcecode:: bash
 
     $ python setup.py install
 
-.. _pip: http://www.pip-installer.org/en/latest/
-.. _clone the project: https://confluence.atlassian.com/display/BITBUCKET/Clone+a+repository
-.. _source distribution: https://pypi.python.org/pypi/robotstatuschecker
+.. _pip: http://pip-installer.org
+
 
 Usage
 =====
@@ -105,7 +106,7 @@ any of the valid log levels in capital letters. If the level is not
 given it defaults to *INFO*.
 
 This syntax can be used multiple times to test multiple messages.  It
-also workstogether with specifying the expected error message with
+also works together with specifying the expected error message with
 *FAIL*, but it that case *FAIL* and the expected error must
 be first.
 
