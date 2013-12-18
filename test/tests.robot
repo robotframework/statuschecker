@@ -118,18 +118,18 @@ FAILURE: Wrong log message
     Log    Hi world!
 
 FAILURE: Wrong log level
-    [Documentation]    LOG 2 Hello world!
+    [Documentation]    LOG 2.1 Hello world!
     Status    FAIL    Wrong level for message 1 of keyword 'BuiltIn.Log'.\n\n
     ...    Expected: INFO\n
     ...    Actual: DEBUG
-    Log    Hello world!    DEBUG
+    Logging User Keyword
 
 FAILURE: Unexpected log message
-    [Documentation]    LOG 2 NONE
-    Status    FAIL    Wrong content for message 1 of keyword 'BuiltIn.Log'.\n\n
+    [Documentation]    LOG 2.1:2 NONE
+    Status    FAIL    Keyword 'BuiltIn.Log Many' (index 2.1) message 2 has wrong content.\n\n
     ...    Expected:\nNONE\n\n
-    ...    Actual:\nUnexpected message
-    Log    Unexpected message
+    ...    Actual:\nKeyword
+    Logging User Keyword 2
 
 FAILURE: Non-existing keyword
     [Documentation]    LOG 2 No keyword here
