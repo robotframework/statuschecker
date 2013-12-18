@@ -228,11 +228,11 @@ class LogMessageChecker(BaseChecker):
         try:
             msg = kw.messages[expected.msg_index]
         except IndexError:
-            if expected.message != 'NONE':
-                message = (
-                    "Keyword '%s' (index %s) does not have message %s."
-                    % (kw.name, expected.kw_index_str, expected.msg_index_str))
-                self._fail(test, message)
+            condition = expected.message == 'NONE'
+            message = (
+                "Keyword '%s' (index %s) does not have message %s."
+                % (kw.name, expected.kw_index_str, expected.msg_index_str))
+            self._assert(condition, test, message)
         else:
             if self._check_msg_level(test, kw, msg, expected):
                 self._check_msg_message(test, kw, msg, expected)
