@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+from distutils.core import setup
+from os.path import abspath, dirname, join
+import re
+
+NAME = 'robotstatuschecker'
 CLASSIFIERS = """
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License
@@ -7,18 +12,12 @@ Operating System :: OS Independent
 Programming Language :: Python
 Topic :: Software Development :: Testing
 """.strip().splitlines()
-
-import sys
-
-from distutils.core import setup
-from os.path import abspath, dirname
-
-sys.path.insert(0, dirname(abspath(__file__)))
-from robotstatuschecker import __version__
+with open(join(dirname(abspath(__file__)), NAME+'.py')) as src:
+    VERSION = re.search("\n__version__ = '(.*)'\n", src.read()).group(1)
 
 setup(
-    name             = 'robotstatuschecker',
-    version          = __version__,
+    name             = NAME,
+    version          = VERSION,
     author           = 'Robot Framework Developers',
     author_email     = 'robotframework@gmail.com',
     url              = 'https://bitbucket.org/robotframework/statuschecker',
@@ -30,5 +29,6 @@ setup(
     keywords         = 'robotframework testing testautomation atdd',
     platforms        = 'any',
     classifiers      = CLASSIFIERS,
-    py_modules       = ['robotstatuschecker']
+    py_modules       = ['robotstatuschecker'],
+    install_requires = ['robotframework']
 )
