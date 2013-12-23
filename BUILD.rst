@@ -3,7 +3,7 @@ Releasing StatusChecker
 
 1. Set ``$VERSION`` shell variable to ease copy-pasting further commands::
 
-    $VERSION=x.y
+    VERSION=x.y
 
 2. Update ``__version__`` in `<robotstatuschecker.py>`__::
 
