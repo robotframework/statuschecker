@@ -12,8 +12,11 @@ Operating System :: OS Independent
 Programming Language :: Python
 Topic :: Software Development :: Testing
 """.strip().splitlines()
-with open(join(dirname(abspath(__file__)), NAME+'.py')) as src:
-    VERSION = re.search("\n__version__ = '(.*)'\n", src.read()).group(1)
+CURDIR = dirname(abspath(__file__))
+with open(join(CURDIR, NAME+'.py')) as f:
+    VERSION = re.search("\n__version__ = '(.*)'\n", f.read()).group(1)
+with open(join(CURDIR, 'README.rst')) as f:
+    README = f.read()
 
 setup(
     name             = NAME,
@@ -25,7 +28,7 @@ setup(
     license          = 'Apache License 2.0',
     description      = 'A tool for checking that Robot Framework test cases '
                        'have expected statuses and log messages.',
-    long_description = open('README.rst').read(),
+    long_description = README,
     keywords         = 'robotframework testing testautomation atdd',
     platforms        = 'any',
     classifiers      = CLASSIFIERS,
