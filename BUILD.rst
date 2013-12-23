@@ -9,7 +9,7 @@ Releasing StatusChecker
 
     sed -i "s/__version__ = .*/__version__ = '$VERSION'/" robotstatuschecker.py
     git diff  # verify changes
-    git commit -am "Updated __version__ to $VERSION" && git push
+    git commit -m "Updated __version__ to $VERSION" robotstatuschecker.py && git push
 
 3. Tag::
 
@@ -29,7 +29,7 @@ Releasing StatusChecker
 7. ``__version__`` back to devel::
 
     sed -i "s/__version__ = .*/__version__ = 'devel'/" robotstatuschecker.py
-    git commit -am "__version__ back to devel" && git push
+    git commit -m "__version__ back to devel" robotstatuschecker.py && git push
 
 8. Advertise on `Twitter <https://twitter.com/robotframework>`__ and on mailing
    lists as needed.
