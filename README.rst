@@ -124,6 +124,9 @@ Message level is specified before the actual message, and it can be
 any of the valid log levels in capital letters. If the level is not
 given it defaults to ``INFO``.
 
+Possible leading and trailing whitespace is ignored both in the expected
+and in the actual log message.
+
 This syntax can be used multiple times to test multiple messages.  It
 also works together with specifying the expected error message with
 ``FAIL``, but it that case ``FAIL`` and the expected error must
@@ -157,7 +160,7 @@ __ `Defining expected test status`_
 
     Log levels
         [Documentation]    LOG 2        DEBUG Debug-level message
-        ...                LOG 1.2:3    WARN Warning 
+        ...                LOG 1.2:3    WARN Warning
         Steps
 
     Multiple Messages
