@@ -29,6 +29,7 @@ Releasing StatusChecker
 7. ``__version__`` back to devel::
 
     sed -i "s/__version__ = .*/__version__ = 'devel'/" robotstatuschecker.py
+    git diff  # verify changes
     git commit -m "__version__ back to devel" robotstatuschecker.py && git push
 
 8. Advertise on `Twitter <https://twitter.com/robotframework>`__ and on mailing
