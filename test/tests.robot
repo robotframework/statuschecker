@@ -42,6 +42,11 @@ Log message
     Status    PASS
     Log    Hello world!
 
+Log message with message index
+    [Documentation]    LOG 2:1 Hello LOG 2:2 world LOG 2:3 !
+    Status    PASS
+    Log Many    Hello    world    !
+
 Log messages with levels
     [Documentation]    LOG 2 DEBUG Hello LOG 3 WARN World
     Status    PASS
