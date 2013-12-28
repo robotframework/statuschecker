@@ -246,7 +246,7 @@ class LogMessageChecker(BaseChecker):
         return self._assert(condition, test, message)
 
     def _check_msg_message(self, test, kw, msg, expected):
-        condition = self._message_matches(msg.message, expected.message)
+        condition = self._message_matches(msg.message.strip(), expected.message)
         message = ("Keyword '%s' (index %s) message %s has wrong content.\n\n"
                    "Expected:\n%s\n\nActual:\n%s"
                    % (kw.name, expected.kw_index_str, expected.msg_index_str,

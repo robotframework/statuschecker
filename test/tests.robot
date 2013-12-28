@@ -53,6 +53,15 @@ Log messages with levels
     Log    Hello    DEBUG
     Log    World    WARN
 
+Trailing and leading whitespace is ignored in log messages
+    [Documentation]
+    ...    LOG 2 \${ret} = ${EMPTY}
+    ...    LOG 2 \${ret} =
+    ...    LOG 3 xxx
+    Status    PASS
+    ${ret} =    Set Variable    ${EMPTY}
+    Log    ${SPACE*10}xxx${SPACE*10}
+
 Log messages deeper
     [Documentation]    LOG 2:1 Hello LOG 2:2 World
     ...    LOG 3.1 DEBUG User Keyword
