@@ -132,12 +132,13 @@ also works together with specifying the expected error message with
 ``FAIL``, but it that case ``FAIL`` and the expected error must
 be first.
 
-The log message can also be given as a regular expression pattern the
-same way as the `expected error message`__. Finally, to check that a
-keyword does not have a certain message, it is possible to use
-``NONE`` in the place of the message.
+It is also possible to give the message as a regular expression pattern
+or to give just the start of the message. This is accomplished by
+prefixing the message with ``REGEXP:`` or ``STARTS:``, respectively,
+exactly like when `defining expected test status`_.
 
-__ `Defining expected test status`_
+Finally, to check that a keyword does not have a certain message, it
+is possible to use ``NONE`` in the place of the message.
 
 .. sourcecode :: robotframework
 
@@ -158,7 +159,7 @@ __ `Defining expected test status`_
         [Documentation]    LOG 3.1:2    2nd msg of 3rd kw's 1st child
         Steps
 
-    Log levels
+    Log Levels
         [Documentation]    LOG 2        DEBUG Debug-level message
         ...                LOG 1.2:3    WARN Warning
         Steps
@@ -176,6 +177,10 @@ __ `Defining expected test status`_
 
     Regexp Message
         [Documentation]    LOG 1        REGEXP: (Hello|Hi) world!
+        Steps
+
+    Start of the Message
+        [Documentation]    LOG 1        STARTS: Hello w
         Steps
 
     No Message
