@@ -2,7 +2,6 @@
 
 import sys
 
-from os import remove
 from os.path import abspath, dirname, exists, join
 from shutil import rmtree
 from subprocess import call
@@ -15,7 +14,7 @@ def check_tests(test_file_path):
     output = _run_tests_and_statuschecker(test_file_path)
     result = ExecutionResult(output)
     checker = StatusCheckerChecker()
-    result.visit(checker)
+    result.suite.visit(checker)
     checker.print_status()
     sys.exit(len(checker.errors))
 
