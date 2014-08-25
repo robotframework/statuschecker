@@ -26,10 +26,16 @@ Ignore documentation before marker
     Fail    Expected failure
 
 Expected FAIL with REGEXP
-    [Documentation]    FAIL REGEXP: Pattern is here .* \\d+
+    [Documentation]    FAIL REGEXP: Pattern is here.* \\d+
     Status    PASS    Test failed as expected.\n\n
-    ...    Original message:\nPattern is here whatever 123
-    Fail    Pattern is here whatever 123
+    ...    Original message:\nPattern is here\nmultiline 123
+    Fail    Pattern is here\nmultiline 123
+
+Expected FAIL with GLOB
+    [Documentation]    FAIL GLOB: Globs ??? way *wl\neven *!?!
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nGlobs are way kewl\neven in multile lines\n!!!
+    Fail    Globs are way kewl\neven in multile lines\n!!!
 
 Expected FAIL with STARTS
     [Documentation]    FAIL STARTS: This is start
@@ -73,13 +79,23 @@ Log messages deeper
 
 Log message with REGEXP
     [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
+    ...    LOG 3 REGEXP: Multi.*message
     Status    PASS
     Log    Hello world!
+    Log    Multi\nline\nmessage
+
+Log message with GLOB
+    [Documentation]    LOG 2 GLOB: *world! LOG 2 GLOB: Hell? ***!
+    Status    PASS
+    Log    Hello world!
+    Log    Multi\nline\nmessage
 
 Log message with STARTS
     [Documentation]    LOG 2 STARTS: Hello LOG 2 STARTS: Hell
+    ...    LOG 3 STARTS: Multi
     Status    PASS
     Log    Hello world!
+    Log    Multi\nline\nmessage
 
 NONE log message
     [Documentation]    LOG 2 NONE LOG 2:1 NONE LOG 3:1 Message LOG 3:2 NONE

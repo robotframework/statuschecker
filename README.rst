@@ -71,8 +71,13 @@ prefixing it with ``REGEXP:``. The specified regular expression
 must match the error message fully. Having spaces between the status,
 the message and the possible regular expression prefix is optional.
 
-It is also possible to test only the beginning of the error by
-prefixing the expected message with ``STARTS:``.
+An alternative to using regular expressions is using glob patterns where
+``*`` matches anything (including newline) and ``?`` matches any single
+character. This is can be accomplished by starting the expected message
+with ``GLOB:``. This is new in version 1.2.
+
+Finally, it is possible to test that the message starts with something
+by prefixing the expected message with ``STARTS:``.
 
 The following examples illustrate different ways to define test
 statuses and messages:
@@ -90,6 +95,10 @@ statuses and messages:
 
     Regexp Example
         [Documentation]    FAIL REGEXP: (IOError|OSError): .*
+        Steps
+
+    Glob Example
+        [Documentation]    FAIL GLOB: ??Error: *
         Steps
 
     Start Example
@@ -132,10 +141,10 @@ also works together with specifying the expected error message with
 ``FAIL``, but it that case ``FAIL`` and the expected error must
 be first.
 
-It is also possible to give the message as a regular expression pattern
-or to give just the start of the message. This is accomplished by
-prefixing the message with ``REGEXP:`` or ``STARTS:``, respectively,
-exactly like when `defining expected test status`_.
+It is also possible to give the message as a regular expression or glob
+pattern or to give just the start of the message. This is accomplished
+by prefixing the message with ``REGEXP:``, ``GLOB:`` or ``STARTS:``,
+respectively, exactly like when `defining expected test status`_.
 
 Finally, to check that a keyword does not have a certain message, it
 is possible to use ``NONE`` in the place of the message.
@@ -177,6 +186,10 @@ is possible to use ``NONE`` in the place of the message.
 
     Regexp Message
         [Documentation]    LOG 1        REGEXP: (Hello|Hi) world!
+        Steps
+
+    Glob Message
+        [Documentation]    LOG 1        GLOB: * world!
         Steps
 
     Start of the Message

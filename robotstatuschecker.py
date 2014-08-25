@@ -52,6 +52,7 @@ import sys
 from os.path import abspath
 
 from robot.api import ExecutionResult, ResultVisitor
+from robot.utils import Matcher
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -147,6 +148,11 @@ class BaseChecker(object):
         if expected.startswith('REGEXP:'):
             pattern = '^%s$' % expected.replace('REGEXP:', '', 1).strip()
             if re.match(pattern, actual, re.DOTALL):
+                return True
+        if expected.startswith('GLOB:'):
+            pattern = expected.replace('GLOB:', '', 1).strip()
+            matcher = Matcher(pattern, caseless=False, spaceless=False)
+            if matcher.match(actual):
                 return True
         if expected.startswith('STARTS:'):
             start = expected.replace('STARTS:', '', 1).strip()
