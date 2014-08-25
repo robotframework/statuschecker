@@ -71,6 +71,16 @@ Log messages deeper
     Logging User Keyword
     Logging User Keyword 2
 
+Log message with REGEXP
+    [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
+    Status    PASS
+    Log    Hello world!
+
+Log message with STARTS
+    [Documentation]    LOG 2 STARTS: Hello LOG 2 STARTS: Hell
+    Status    PASS
+    Log    Hello world!
+
 NONE log message
     [Documentation]    LOG 2 NONE LOG 2:1 NONE LOG 3:1 Message LOG 3:2 NONE
     Status    PASS
