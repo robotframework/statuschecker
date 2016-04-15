@@ -61,10 +61,10 @@ class StatusCheckerChecker(ResultVisitor):
     def print_status(self):
         print
         if self.errors:
-            print '%d/%d test failed:' % (len(self.errors), self.tests)
-            print '\n-------------------------------------\n'.join(self.errors)
+            print('%d/%d test failed:' % (len(self.errors), self.tests))
+            print('\n-------------------------------------\n'.join(self.errors))
         else:
-            print 'All %d tests passed/failed/logged as expected.' % self.tests
+            print('All %d tests passed/failed/logged as expected.' % self.tests)
 
 
 if __name__ == '__main__':

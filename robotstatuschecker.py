@@ -61,10 +61,10 @@ def process_output(inpath, outpath=None, verbose=True):
     When verbose is True, prints the paths to inpath and outpath.
     """
     if verbose:
-        print 'Checking %s' % abspath(inpath)
+        print('Checking %s' % abspath(inpath))
     result = StatusChecker(inpath, outpath).process_output()
     if verbose and outpath:
-        print 'Output: %s' % abspath(outpath)
+        print('Output: %s' % abspath(outpath))
     return result.return_code
 
 
@@ -262,11 +262,11 @@ class LogMessageChecker(BaseChecker):
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
-        print __doc__
+        print(__doc__)
         sys.exit(251)
     try:
         rc = process_output(*sys.argv[1:])
     except TypeError:
-        print __doc__
+        print(__doc__)
         sys.exit(252)
     sys.exit(rc)
