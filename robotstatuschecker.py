@@ -54,6 +54,8 @@ from os.path import abspath
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
+from __future__ import print_function
+
 
 def process_output(inpath, outpath=None, verbose=True):
     """Programmatic entry point to Status Checker.
