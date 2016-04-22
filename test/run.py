@@ -2,33 +2,37 @@
 
 from __future__ import print_function
 
-import sys
-
 from os.path import abspath, dirname, exists, join
+from platform import python_implementation, python_version
 from shutil import rmtree
-from subprocess import call
+import sys
 
 from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
 
+CURDIR = dirname(abspath(__file__))
+sys.path.insert(0, dirname(CURDIR))
 
-def check_tests(test_file_path):
-    output = _run_tests_and_statuschecker(test_file_path)
+from robotstatuschecker import process_output
+
+
+def check_tests(robot_file):
+    output = _run_tests_and_process_output(robot_file)
     result = ExecutionResult(output)
     checker = StatusCheckerChecker()
     result.suite.visit(checker)
     checker.print_status()
     sys.exit(len(checker.errors))
 
-def _run_tests_and_statuschecker(test_file):
-    curdir = dirname(abspath(__file__))
-    results = join(curdir, 'results')
+
+def _run_tests_and_process_output(robot_file):
+    results = join(CURDIR, 'results')
     output = join(results, 'output.xml')
     if exists(results):
         rmtree(results)
-    run(join(curdir, test_file), output=output, log=None, report=None,
+    run(join(CURDIR, robot_file), output=output, log=None, report=None,
         loglevel='DEBUG')
-    call(['python', join(dirname(curdir), 'robotstatuschecker.py'), output])
+    process_output(output)
     rebot(output, outputdir=results)
     return output
 
@@ -61,12 +65,13 @@ class StatusCheckerChecker(ResultVisitor):
                 % (explanation, expected, actual))
 
     def print_status(self):
-        print
+        print()
         if self.errors:
             print('%d/%d test failed:' % (len(self.errors), self.tests))
             print('\n-------------------------------------\n'.join(self.errors))
         else:
             print('All %d tests passed/failed/logged as expected.' % self.tests)
+        print('Run on %s %s.' % (python_implementation(), python_version()))
 
 
 if __name__ == '__main__':
