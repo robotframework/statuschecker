@@ -65,7 +65,7 @@ def process_output(inpath, outpath=None, verbose=True):
     """
     if verbose:
         print('Checking %s' % abspath(inpath))
-    result = StatusChecker(inpath, outpath).process_output()
+    result = StatusChecker().process_output(inpath, outpath)
     if verbose and outpath:
         print('Output: %s' % abspath(outpath))
     return result.return_code
@@ -73,14 +73,10 @@ def process_output(inpath, outpath=None, verbose=True):
 
 class StatusChecker(ResultVisitor):
 
-    def __init__(self, inpath, outpath=None):
-        self._inpath = inpath
-        self._outpath = outpath
-
-    def process_output(self):
-        result = ExecutionResult(self._inpath)
+    def process_output(self, inpath, outpath=None):
+        result = ExecutionResult(inpath)
         result.suite.visit(self)
-        result.save(self._outpath)
+        result.save(outpath)
         return result
 
     def visit_test(self, test):
