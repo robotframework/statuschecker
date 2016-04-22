@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#  Copyright 2008-2016 Nokia Siemens Networks
+#  Copyright 2008-2016 Nokia Networks
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -16,29 +16,29 @@
 
 """Robot Framework Test Status Checker
 
-Command-line usage:
-
-    python -m robotstatuschecker infile [outfile]
-
-Programmatical usage:
-
-    from robotstatuschecker import process_output
-    process_output('infile.xml', 'outfile.xml')
-
 This tool processes Robot Framework output XML files and checks that test case
 statuses and messages are as expected. Main use case is post-processing output
 files got when testing Robot Framework test libraries using Robot Framework
 itself. The tool assumes that Robot Framework is installed on the system.
 
-If output file is not given, the input file is considered to be also output
-file and it is edited in place.
+Command-line usage:
+
+    python -m robotstatuschecker infile [outfile]
+
+Programmatic usage:
+
+    from robotstatuschecker import process_output
+    process_output('infile.xml', 'outfile.xml')
+
+If an output file is not given, the input file is edited in place.
 
 By default all test cases are expected to 'PASS' and have no message. Changing
 the expected status to 'FAIL' is done by having word 'FAIL' (in uppercase)
 somewhere in the test case documentation. Expected error message must then be
-given after 'FAIL'. Error message can also be specified as a regular
-expression by prefixing it with string 'REGEXP:'. Testing only the beginning
-of the message is possible with 'STARTS:' prefix.
+given after 'FAIL'. Error messages can also be specified as glob patterns or
+regular expression by prefixing them with string 'GLOB:' or 'REGEXP:',
+respectively. Testing only the beginning of the message is possible with
+'STARTS:' prefix.
 
 This tool also allows testing the created log messages. They are specified
 using format 'LOG x.y:z LEVEL Actual message', which is described in detail
@@ -47,20 +47,25 @@ in the tool documentation.
 
 from __future__ import print_function
 
-__version__ = 'devel'
-
+from os.path import abspath
 import re
 import sys
-from os.path import abspath
 
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 
+__version__ = 'devel'
+
+
 def process_output(inpath, outpath=None, verbose=True):
     """Programmatic entry point to Status Checker.
 
-    When verbose is True, prints the paths to inpath and outpath.
+    ``inpath`` is a path to Robot Framework output file (output.xml) to process
+    and ``outpath`` specifies the path where to write processed output. If
+    ``outpath`` is not given, ``inpath`` is edited in place.
+
+    When verbose is ``True``, prints both ``inpath`` and ``output`` to console.
     """
     if verbose:
         print('Checking %s' % abspath(inpath))

@@ -10,7 +10,8 @@ Introduction
 StatusChecker is a tool for validating that executed `Robot Framework`_
 test cases have expected statuses and log messages. It is mainly useful
 for Robot Framework test library developers who want to use Robot
-Framework to also test their libraries. Works with Pythons 2 and 3.
+Framework to also test their libraries. StatusChecker 1.3 and newer are
+compatible both with Python 2 and Python 3.
 
 StatusChecker project is hosted at GitHub_ and downloads are at
 PyPI_.
@@ -48,8 +49,7 @@ Programmatically:
 
     process_output('infile.xml', 'outfile.xml')
 
-If an output file is not given, the input file is considered to be
-also an output file and it is edited in place.
+If an output file is not given, the input file is edited in place.
 
 Defining expected test status
 -----------------------------
@@ -80,33 +80,33 @@ by prefixing the expected message with ``STARTS:``.
 The following examples illustrate different ways to define test
 statuses and messages:
 
-.. sourcecode :: robotframework
+.. sourcecode:: robotframework
 
-    *** Test cases ***
-    Simple Example
+    *** Test Cases ***
+    Simple failure
         [Documentation]    FAIL Expected error message
         Steps
 
-    Exclude Documentation Before Marker
+    Exclude documentation before marker
         [Documentation]    This text is ignored FAIL Expected error message
         Steps
 
-    Regexp Example
+    Regexp example
         [Documentation]    FAIL REGEXP: (IOError|OSError): .*
         Steps
 
-    Glob Example
+    Glob example
         [Documentation]    FAIL GLOB: ??Error: *
         Steps
 
-    Start Example
+    Start example
         [Documentation]    FAIL STARTS: IOError:
         Steps
 
-    Passing Without Message
+    Passing without message
         Steps
 
-    Passing With Message
+    Passing with message
         [Documentation]    PASS Expected message
         Steps
 
@@ -147,54 +147,54 @@ respectively, exactly like when `defining expected test status`_.
 Finally, to check that a keyword does not have a certain message, it
 is possible to use ``NONE`` in the place of the message.
 
-.. sourcecode :: robotframework
+.. sourcecode:: robotframework
 
     *** Test cases ***
-    Simple Example
+    Simple example
         [Documentation]    LOG 1        Hello, world!
         Steps
 
-    Nested Keywords
+    Nested keywords
         [Documentation]    LOG 2.1      1st child of 2nd kw
         Steps
 
-    Message Index
+    Message index
         [Documentation]    LOG 2:2      2nd msg of 2nd kw
         Steps
 
-    Nested and Index
+    Nested and index
         [Documentation]    LOG 3.1:2    2nd msg of 3rd kw's 1st child
         Steps
 
-    Log Levels
+    Log levels
         [Documentation]    LOG 2        DEBUG Debug-level message
         ...                LOG 1.2:3    WARN Warning
         Steps
 
-    Multiple Messages
+    Multiple messages
         [Documentation]    LOG 1        First tested message
         ...                LOG 1.2      Second tested message
         ...                LOG 2.2.1    DEBUG Third tested message
         Steps
 
-    Status and Log
+    Status and log
         [Documentation]    FAIL         Expected error message
         ...                LOG 1.2      Expected log message
         Steps
 
-    Regexp Message
+    Regexp message
         [Documentation]    LOG 1        REGEXP: (Hello|Hi) world!
         Steps
 
-    Glob Message
+    Glob message
         [Documentation]    LOG 1        GLOB: * world!
         Steps
 
-    Start of the Message
+    Start of the message
         [Documentation]    LOG 1        STARTS: Hello w
         Steps
 
-    No Message
+    No message
         [Documentation]    LOG 1:1      Test that we have only 1 msg
         ...                LOG 1:2      NONE
         Steps
