@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-#  Copyright 2008-2013 Nokia Siemens Networks Oyj
+#  Copyright 2008-2016 Nokia Siemens Networks
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -45,6 +45,8 @@ using format 'LOG x.y:z LEVEL Actual message', which is described in detail
 in the tool documentation.
 """
 
+from __future__ import print_function
+
 __version__ = 'devel'
 
 import re
@@ -61,10 +63,10 @@ def process_output(inpath, outpath=None, verbose=True):
     When verbose is True, prints the paths to inpath and outpath.
     """
     if verbose:
-        print 'Checking %s' % abspath(inpath)
+        print('Checking %s' % abspath(inpath))
     result = StatusChecker(inpath, outpath).process_output()
     if verbose and outpath:
-        print 'Output: %s' % abspath(outpath)
+        print('Output: %s' % abspath(outpath))
     return result.return_code
 
 
@@ -262,11 +264,11 @@ class LogMessageChecker(BaseChecker):
 
 if __name__ == '__main__':
     if '-h' in sys.argv or '--help' in sys.argv:
-        print __doc__
+        print(__doc__)
         sys.exit(251)
     try:
         rc = process_output(*sys.argv[1:])
     except TypeError:
-        print __doc__
+        print(__doc__)
         sys.exit(252)
     sys.exit(rc)

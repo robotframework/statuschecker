@@ -10,7 +10,7 @@ Introduction
 StatusChecker is a tool for validating that executed `Robot Framework`_
 test cases have expected statuses and log messages. It is mainly useful
 for Robot Framework test library developers who want to use Robot
-Framework to also test their libraries.
+Framework to also test their libraries. Works with Pythons 2 and 3.
 
 StatusChecker project is hosted at GitHub_ and downloads are at
 PyPI_.
