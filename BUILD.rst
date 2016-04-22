@@ -1,36 +1,40 @@
 Releasing StatusChecker
 =======================
 
-1. Set ``$VERSION`` shell variable to ease copy-pasting further commands::
+1. Execute tests using different Python implementations and versions.
+   See `<test/README.rst>`_ for instructions.
 
-    VERSION=x.y
+2. Set ``$VERSION`` shell variable to ease copy-pasting further commands::
 
-2. Update ``__version__`` in `<robotstatuschecker.py>`__::
+      VERSION=x.y
 
-    sed -i "s/__version__ = .*/__version__ = '$VERSION'/" robotstatuschecker.py
-    git diff  # verify changes
-    git commit -m "Updated __version__ to $VERSION" robotstatuschecker.py && git push
+3. Update ``__version__`` in `<robotstatuschecker.py>`_::
 
-3. Tag::
+      sed -i "s/__version__ = .*/__version__ = '$VERSION'/" robotstatuschecker.py
+      git diff  # verify changes
+      git commit -m "Updated __version__ to $VERSION" robotstatuschecker.py && git push
 
-    git tag -a $VERSION -m "Release $VERSION" && git push --tags
+4. Tag::
 
-4. Create distribution::
+      git tag -a $VERSION -m "Release $VERSION" && git push --tags
 
-    python setup.py sdist register upload
+5. Create distribution::
 
-5. Verify that `PyPI <https://pypi.python.org/pypi/robotstatuschecker>`__
-   looks good.
+      python setup.py sdist register upload
 
-6. Test that installation works::
+6. Verify that `PyPI pages <https://pypi.python.org/pypi/robotstatuschecker>`_
+   look good.
 
-    pip install robotstatuschecker --upgrade
+7. Test that installation works::
 
-7. ``__version__`` back to devel::
+      pip install robotstatuschecker --upgrade
 
-    sed -i "s/__version__ = .*/__version__ = 'devel'/" robotstatuschecker.py
-    git diff  # verify changes
-    git commit -m "__version__ back to devel" robotstatuschecker.py && git push
+8. ``__version__`` back to ``devel``::
 
-8. Advertise on `Twitter <https://twitter.com/robotframework>`__ and on mailing
-   lists as needed.
+      sed -i "s/__version__ = .*/__version__ = 'devel'/" robotstatuschecker.py
+      git diff  # verify changes
+      git commit -m "__version__ back to devel" robotstatuschecker.py && git push
+
+9. Advertise on mailing lists, `Twitter <https://twitter.com/robotframework>`_,
+   `LinkedIn <https://www.linkedin.com/groups/3710899>`_, and elsewhere as
+   needed.
