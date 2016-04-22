@@ -14,12 +14,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Robot Framework Test Status Checker
+"""Robot Framework test status checker
 
 This tool processes Robot Framework output XML files and checks that test case
 statuses and messages are as expected. Main use case is post-processing output
 files got when testing Robot Framework test libraries using Robot Framework
-itself. The tool assumes that Robot Framework is installed on the system.
+itself.
+
+The project is hosted at https://github.com/robotframework/statuschecker/.
+See documentation there for the syntax how to specify expected statuses and
+log messages.
 
 Command-line usage:
 
@@ -31,18 +35,6 @@ Programmatic usage:
     process_output('infile.xml', 'outfile.xml')
 
 If an output file is not given, the input file is edited in place.
-
-By default all test cases are expected to 'PASS' and have no message. Changing
-the expected status to 'FAIL' is done by having word 'FAIL' (in uppercase)
-somewhere in the test case documentation. Expected error message must then be
-given after 'FAIL'. Error messages can also be specified as glob patterns or
-regular expression by prefixing them with string 'GLOB:' or 'REGEXP:',
-respectively. Testing only the beginning of the message is possible with
-'STARTS:' prefix.
-
-This tool also allows testing the created log messages. They are specified
-using format 'LOG x.y:z LEVEL Actual message', which is described in detail
-in the tool documentation.
 """
 
 from __future__ import print_function
@@ -59,13 +51,17 @@ __version__ = 'devel'
 
 
 def process_output(inpath, outpath=None, verbose=True):
-    """Programmatic entry point to Status Checker.
+    """The main programmatic entry point to status checker.
 
-    ``inpath`` is a path to Robot Framework output file (output.xml) to process
-    and ``outpath`` specifies the path where to write processed output. If
-    ``outpath`` is not given, ``inpath`` is edited in place.
+    Args:
+        inpath (str): Path to Robot Framework XML output file to process.
+        outpath (str): Path where to write processed output. If not given,
+            ``inpath`` is edited in place.
+        verbose (bool): When ``True`` (default), prints both ``inpath`` and
+            ``outpath`` to console.
 
-    When verbose is ``True``, prints both ``inpath`` and ``output`` to console.
+    Returns:
+        int: Number of failed critical tests after post-processing.
     """
     if verbose:
         print('Checking %s' % abspath(inpath))
