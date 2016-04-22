@@ -45,6 +45,8 @@ using format 'LOG x.y:z LEVEL Actual message', which is described in detail
 in the tool documentation.
 """
 
+from __future__ import print_function
+
 __version__ = 'devel'
 
 import re
@@ -53,8 +55,6 @@ from os.path import abspath
 
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
-
-from __future__ import print_function
 
 
 def process_output(inpath, outpath=None, verbose=True):
