@@ -25,7 +25,7 @@ setup(
     version          = VERSION,
     author           = 'Robot Framework Developers',
     author_email     = 'robotframework@gmail.com',
-    url              = 'https://bitbucket.org/robotframework/statuschecker',
+    url              = 'https://github.com/robotframework/statuschecker',
     download_url     = 'https://pypi.python.org/pypi/robotstatuschecker',
     license          = 'Apache License 2.0',
     description      = 'A tool for checking that Robot Framework test cases '
