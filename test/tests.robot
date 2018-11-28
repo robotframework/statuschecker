@@ -13,6 +13,10 @@ Explicit PASS with message
     Status    PASS    The message
     Pass Execution    The message
 
+Explicit PASS without message
+    [Documentation]    PASS
+    Status    PASS
+
 Expected FAIL
     [Documentation]    FAIL Expected failure
     Status    PASS    Test failed as expected.\n\n
@@ -115,6 +119,18 @@ Expected FAIL and log messages
     Log    Any time now...
     Fail    Told ya!!
 
+Expected FAIL and log messages and no message before FAIL
+    [Documentation]    FAIL Told ya!!
+    ...    LOG 2 Failing soon!
+    ...    LOG 3 Any time now...
+    ...    LOG 4:1 FAIL Told ya!!
+    ...    LOG 4:2 DEBUG STARTS: Traceback
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nTold ya!!
+    Log    Failing soon!
+    Log    Any time now...
+    Fail    Told ya!!
+
 Expected PASS and log messages
     [Documentation]    This text is ignored. PASS Told ya!!
     ...    LOG 2 Passing soon!
@@ -125,6 +141,44 @@ Expected PASS and log messages
     Log    Passing soon!
     Log    Any time now...
     Pass Execution    Told ya!!
+
+Expected PASS and log messages and no message before PASS
+    [Documentation]    PASS Told ya!!
+    ...    LOG 2 Passing soon!
+    ...    LOG 3 Any time now...
+    ...    LOG 4:1 Execution passed with message:\nTold ya!!
+    ...    LOG 4:2 NONE
+    Status    PASS    Told ya!!
+    Log    Passing soon!
+    Log    Any time now...
+    Pass Execution    Told ya!!
+
+Test case PASS log INFO
+    [Documentation]    PASS
+    ...    LOG 2 INFO The message
+    Status    PASS    The message
+    Log    The message
+
+Test case FAIL log FAIL
+    [Documentation]    FAIL
+    ...    LOG 2 FAIL The error message
+    Status    FAIL    The error message
+    Fail    The error message
+
+Test case PASS log FAIL
+    [Documentation]    PASS
+    ...    LOG 2:1 FAIL The error message
+    Status    PASS
+    Run Keyword And Expect Error
+    ...    The error message
+    ...    Fail    The error message
+
+Test case FAIL log INFO
+    [Documentation]    FAIL
+    ...    LOG 2 INFO Failing soon!
+    Status    FAIL    The error message
+    Log    Failing soon!
+    Fail    The error message
 
 FAILURE: Unexpected PASS
     [Documentation]    FAIL Expected failure does not occur
