@@ -160,21 +160,22 @@ Test case PASS log INFO
     Log    The message
 
 Test case FAIL log FAIL
-    [Documentation]    FAIL
+    [Documentation]    FAIL The error message
     ...    LOG 2 FAIL The error message
     Status    FAIL    The error message
     Fail    The error message
 
 Test case PASS log FAIL
-    [Documentation]    PASS
-    ...    LOG 2:1 FAIL The error message
+    [Documentation]    PASS The success message
+    ...    LOG 2.1:1 FAIL The error message
     Status    PASS
     Run Keyword And Expect Error
     ...    The error message
     ...    Fail    The error message
+    pass execution    The success message
 
 Test case FAIL log INFO
-    [Documentation]    FAIL
+    [Documentation]    FAIL The error message
     ...    LOG 2 INFO Failing soon!
     Status    FAIL    The error message
     Log    Failing soon!
