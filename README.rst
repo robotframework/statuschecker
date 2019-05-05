@@ -129,7 +129,8 @@ The message index is optional and defaults to ``1``.
 
 Message level is specified before the actual message, and it can be
 any of the valid log levels in capital letters. If the level is not
-given it defaults to ``INFO``.
+given it defaults to ``INFO``. Starting from 1.4 release also
+``ERROR`` level is supported.
 
 Possible leading and trailing whitespace is ignored both in the expected
 and in the actual log message.
