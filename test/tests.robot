@@ -54,10 +54,13 @@ Log message with message index
     Log Many    Hello    world    !
 
 Log messages with levels
-    [Documentation]    LOG 2 DEBUG Hello LOG 3 WARN World
+    [Documentation]    LOG 2 DEBUG Hello
+    ...    LOG 3 WARN World
+    ...    LOG 4 ERROR Tidii
     Status    PASS
     Log    Hello    DEBUG
     Log    World    WARN
+    Log    Tidii    ERROR
 
 Trailing and leading whitespace is ignored in log messages
     [Documentation]

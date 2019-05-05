@@ -133,7 +133,7 @@ class ExpectedLog(object):
         return kw_index, msg_index
 
     def _split_level(self, message):
-        for level in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL']:
+        for level in ['TRACE', 'DEBUG', 'INFO', 'WARN', 'FAIL', 'ERROR']:
             if message.startswith(level):
                 return level, message[len(level):].strip()
         return 'INFO', message
