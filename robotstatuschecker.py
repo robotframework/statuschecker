@@ -49,10 +49,6 @@ from robot.utils import Matcher
 
 
 __version__ = 'devel'
-width = 78
-status_length = len('| PASS |')
-suite_separator = '%s' % ('=' * width)
-test_separator = '%s' % ('-' * width)
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -79,8 +75,10 @@ def process_output(inpath, outpath=None, verbose=True):
 class StatusChecker(ResultVisitor):
 
     def __init__(self):
+        width = 78
+        suite_separator = '%s' % ('=' * width)
         logger.console(suite_separator)
-        logger.console('Postprocessing of results by StatusChecker...')
+        logger.console('*************** Postprocessing of results by StatusChecker.... ***************')
         logger.console(suite_separator)
 
     def process_output(self, inpath, outpath=None):
@@ -96,21 +94,17 @@ class StatusChecker(ResultVisitor):
         LOGGER.end_suite(suite)
 
     def visit_test(self, test):
-        expected = Expected(test.doc)
-        if TestStatusChecker(expected).check(test):
-            LogMessageChecker(expected).check(test)
-        test.keywords.visit(self)
-        self.end_test(test)
+        if self.start_test(test) is not False:
+            expected = Expected(test.doc)
+            if TestStatusChecker(expected).check(test):
+                LogMessageChecker(expected).check(test)
+            self.end_test(test)
+
+    def start_test(self, test):
+        LOGGER.start_test(test)
 
     def end_test(self, test):
-        # LOGGER.end_test(test)
-        name_length = len(test.name)
-        space_length = width - status_length - name_length
-        space = '%s' % (" " * space_length)
-        logger.console('%s%s| %s |' % (test.name, space, test.status))
-        if test.message:
-            logger.console(test.message)
-        logger.console(test_separator)
+        LOGGER.end_test(test)
 
     def visit_keyword(self, kw):
         pass
