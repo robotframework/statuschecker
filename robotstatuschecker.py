@@ -47,7 +47,7 @@ from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 
-__version__ = "1.5.1"
+__version__ = "1.5.2.dev1"
 
 
 def process_output(inpath, outpath=None, verbose=True):
