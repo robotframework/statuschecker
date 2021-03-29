@@ -111,7 +111,7 @@ Tagging
       git push --tags
 
 2. Add short release notes to GitHub's `releases page
-   <https://github.com/robotframework/SeleniumLibrary/releases>`_
+   <https://github.com/robotframework/statuschecker/releases>`_
    with a link to the full release notes.
 
 Creating distributions
@@ -141,7 +141,7 @@ Creating distributions
       twine upload dist/*
 
 5. Verify that project the page at `PyPI
-   <https://pypi.python.org/pypi/robotframework-seleniumlibrary>`_
+   <https://pypi.org/project/robotstatuschecker/>`_
    looks good.
 
 6. Test installation (add ``--pre`` with pre-releases)::
@@ -165,7 +165,7 @@ Post actions
    to ``2.0.1a2.dev1``.
 
 3. Close the `issue tracker milestone
-   <https://github.com/robotframework/SeleniumLibrary/milestones>`_.
+   <https://github.com/robotframework/statuschecker/milestones>`_.
    Create also new milestone for the next release unless one exists already.
 
 4. Advertise on mailing lists, `Twitter <https://twitter.com/robotframework>`_,

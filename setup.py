@@ -20,7 +20,7 @@ Framework :: Robot Framework
 """.strip().splitlines()
 CURDIR = dirname(abspath(__file__))
 with open(join(CURDIR, NAME+'.py')) as f:
-    VERSION = re.search("\n__version__ = '(.*)'\n", f.read()).group(1)
+    VERSION = re.search('\n__version__ = "(.*)"\n', f.read()).group(1)
 with open(join(CURDIR, 'README.rst')) as f:
     README = f.read()
 
