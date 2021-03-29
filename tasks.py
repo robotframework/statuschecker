@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 
 from invoke import task
@@ -45,3 +46,43 @@ def set_version(ctx, version):
 def print_version(ctx):
     """Print the current project version."""
     print(Version(path=VERSION_PATH, pattern=VERSION_PATTERN))
+
+
+@task
+def release_notes(ctx, version=None, username=None, password=None, write=False):
+    """Generates release notes based on issues in the issue tracker.
+    Args:
+        version:  Generate release notes for this version. If not given,
+                  generated them for the current version.
+        username: GitHub username.
+        password: GitHub password.
+        write:    When set to True, write release notes to a file overwriting
+                  possible existing file. Otherwise just print them to the
+                  terminal.
+    Username and password can also be specified using ``GITHUB_USERNAME`` and
+    ``GITHUB_PASSWORD`` environment variable, respectively. If they aren't
+    specified at all, communication with GitHub is anonymous and typically
+    pretty slow.
+    """
+    version = Version(version, VERSION_PATH, VERSION_PATTERN)
+    folder = RELEASE_NOTES_PATH.parent.resolve()
+    folder.mkdir(parents=True, exist_ok=True)
+    file = RELEASE_NOTES_PATH if write else sys.stdout
+    generator = ReleaseNotesGenerator(
+        REPOSITORY, RELEASE_NOTES_TITLE, RELEASE_NOTES_INTRO
+    )
+    generator.generate(version, username, password, file)
+
+
+@task
+def init_labels(ctx, username=None, password=None):
+    """Initialize project by setting labels in the issue tracker.
+    Args:
+        username: GitHub username.
+        password: GitHub password.
+    Username and password can also be specified using ``GITHUB_USERNAME`` and
+    ``GITHUB_PASSWORD`` environment variable, respectively.
+    Should only be executed once when taking ``rellu`` tooling to use or
+    when labels it uses have changed.
+    """
+    initialize_labels(REPOSITORY, username, password)
