@@ -48,7 +48,7 @@ from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 
-__version__ = 'devel'
+__version__ = "1.5.0"
 
 RF4 = not rf_version.startswith("3")
 
