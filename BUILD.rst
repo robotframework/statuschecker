@@ -29,7 +29,7 @@ Preparation
       invoke clean
 
 3. Execute tests using different Python implementations and versions.
-   See `<test/README.rst>`_ for instructions.
+   See `<README.rst>`_ for instructions.
 
 4. Set version information to a shell variable to ease copy-pasting further
    commands. Add ``aN``, ``bN`` or ``rcN`` postfix if creating a pre-release::
@@ -146,7 +146,7 @@ Creating distributions
 
 6. Test installation (add ``--pre`` with pre-releases)::
 
-      pip install --upgrade robotframework-seleniumlibrary
+      pip install --upgrade robotstatuschecker
 
 Post actions
 ------------
@@ -158,7 +158,7 @@ Post actions
 2. Set dev version based on the previous version::
 
       invoke set-version dev
-      git commit -m "Back to dev version" src/SeleniumLibrary/__init__.py
+      git commit -m "Back to dev version" robotstatuschecker.py
       git push
 
    For example, ``1.2.3`` is changed to ``1.2.4.dev1`` and ``2.0.1a1``
