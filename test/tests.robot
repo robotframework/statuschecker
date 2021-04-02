@@ -129,6 +129,12 @@ Expected PASS and log messages
     Log    Any time now...
     Pass Execution    Told ya!!
 
+Expect PASS And Log Messages Many times
+    [Documentation]    ...
+    ...    LOG 2:1    INFO    Kala
+    [Setup]    Status    PASS
+    Log    Kala
+
 FAILURE: Unexpected PASS
     [Documentation]    FAIL Expected failure does not occur
     Status    FAIL    Test was expected to FAIL but it PASSED.

@@ -43,11 +43,14 @@ from os.path import abspath
 import re
 import sys
 
+from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 
 __version__ = "1.5.2.dev1"
+
+RF3 = rf_version.startswith("3")
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -222,7 +225,12 @@ class LogMessageChecker(BaseChecker):
         kw = None
         try:
             for index in expected.kw_index:
-                kw = (kw or test).keywords[index]
+                if RF3:
+                    kw = (kw or test).keywords[index]
+                else:
+                    if len(test.setup.body) > 0:
+                        index -= 1
+                    kw = (kw or test).body[index]
             return kw
         except IndexError:
             message = "No keyword with index '%s'." % expected.kw_index_str

@@ -14,6 +14,7 @@ CURDIR = dirname(abspath(__file__))
 sys.path.insert(0, dirname(CURDIR))
 
 from robotstatuschecker import process_output
+from robotstatuschecker import RF3
 
 
 def check_tests(robot_file):
@@ -53,6 +54,20 @@ class StatusCheckerChecker(ResultVisitor):
             self.errors.append('%s:\n%s' % (test.name, '\n'.join(errors)))
 
     def _get_expected(self, test):
+        if RF3:
+            return self._get_expected_rf3(test)
+        else:
+            return self._get_expected_rf4(test)
+
+    def _get_expected_rf4(self, test):
+        if len(test.setup.body) == 0:
+            kw = test.body[0]
+        else:
+            kw = test.setup
+        return (kw.body[1].messages[0].message,
+                kw.body[2].messages[0].message)
+
+    def _get_expected_rf3(self, test):
         kw = test.keywords[0]
         assert kw.name == 'Status', "No 'Status' keyword found."
         return (kw.keywords[1].messages[0].message,
