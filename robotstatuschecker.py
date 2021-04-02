@@ -62,10 +62,10 @@ def process_output(inpath, outpath=None, verbose=True):
         int: Number of failed critical tests after post-processing.
     """
     if verbose:
-        print("Checking %s" % abspath(inpath))
+        print(f"Checking {abspath(inpath)}")
     result = StatusChecker().process_output(inpath, outpath)
     if verbose and outpath:
-        print("Output: %s" % abspath(outpath))
+        print(f"Output: {abspath(outpath)}")
     return result.return_code
 
 
@@ -139,7 +139,7 @@ class BaseChecker:
         if actual == expected:
             return True
         if expected.startswith("REGEXP:"):
-            pattern = "^%s$" % expected.replace("REGEXP:", "", 1).strip()
+            pattern = f"^{expected.replace('REGEXP:', '', 1).strip()}$"
             if re.match(pattern, actual, re.DOTALL):
                 return True
         if expected.startswith("GLOB:"):
@@ -170,7 +170,7 @@ class BaseChecker:
 
     def _set_message(self, test, message):
         if test.message:
-            original = "\n\nOriginal message:\n%s" % test.message
+            original = f"\n\nOriginal message:\n{test.message}"
         else:
             original = ""
         test.message = message + original
@@ -187,12 +187,12 @@ class TestStatusChecker(BaseChecker):
 
     def _check_status(self, test):
         condition = test.status == self.status
-        message = "Test was expected to %s but it %sED." % (self.status, test.status)
+        message = f"Test was expected to {self.status} but it {test.status}ED."
         return self._assert(condition, test, message)
 
     def _check_message(self, test):
         if not self._message_matches(test.message, self.message):
-            message = "Wrong message.\n\nExpected:\n%s" % self.message
+            message = f"Wrong message.\n\nExpected:\n{self.message}"
             return self._fail(test, message)
         if test.status == "FAIL":
             return self._pass(test, "Test failed as expected.")
@@ -216,7 +216,7 @@ class LogMessageChecker(BaseChecker):
                 kw = (kw or test).keywords[index]
             return kw
         except IndexError:
-            message = "No keyword with index '%s'." % expected.kw_index_str
+            message = f"No keyword with index '{expected.kw_index_str}'."
             self._fail(test, message)
             return None
 
@@ -225,7 +225,9 @@ class LogMessageChecker(BaseChecker):
             msg = kw.messages[expected.msg_index]
         except IndexError:
             condition = expected.message == "NONE"
-            message = "Keyword '%s' (index %s) does not have message %s." % (kw.name, expected.kw_index_str, expected.msg_index_str)
+            message = (
+                f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not have message {expected.msg_index_str}."
+            )
             self._assert(condition, test, message)
         else:
             if self._check_msg_level(test, kw, msg, expected):
@@ -233,23 +235,17 @@ class LogMessageChecker(BaseChecker):
 
     def _check_msg_level(self, test, kw, msg, expected):
         condition = msg.level == expected.level
-        message = "Keyword '%s' (index %s) message %s has wrong level.\n\n" "Expected: %s\nActual: %s" % (
-            kw.name,
-            expected.kw_index_str,
-            expected.msg_index_str,
-            expected.level,
-            msg.level,
+        message = (
+            f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong level."
+            f"\n\nExpected: {expected.level}\nActual: {msg.level}"
         )
         return self._assert(condition, test, message)
 
     def _check_msg_message(self, test, kw, msg, expected):
         condition = self._message_matches(msg.message.strip(), expected.message)
-        message = "Keyword '%s' (index %s) message %s has wrong content.\n\n" "Expected:\n%s\n\nActual:\n%s" % (
-            kw.name,
-            expected.kw_index_str,
-            expected.msg_index_str,
-            expected.message,
-            msg.message,
+        message = (
+            f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong content."
+            f"\n\nExpected:\n{expected.message}\n\nActual:\n{msg.message}"
         )
         return self._assert(condition, test, message)
 
