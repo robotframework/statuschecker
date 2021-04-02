@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup
 
 from os.path import abspath, dirname, join
 import re
@@ -13,7 +10,6 @@ CLASSIFIERS = """
 Development Status :: 5 - Production/Stable
 License :: OSI Approved :: Apache Software License
 Operating System :: OS Independent
-Programming Language :: Python :: 2
 Programming Language :: Python :: 3
 Topic :: Software Development :: Testing
 Framework :: Robot Framework
@@ -39,5 +35,6 @@ setup(
     platforms        = 'any',
     classifiers      = CLASSIFIERS,
     py_modules       = ['robotstatuschecker'],
-    install_requires = ['robotframework']
+    install_requires = ['robotframework'],
+    python_requires  = '>=3.6,<4.0'
 )

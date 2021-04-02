@@ -37,8 +37,6 @@ Programmatic usage:
 If an output file is not given, the input file is edited in place.
 """
 
-from __future__ import print_function
-
 from os.path import abspath
 import re
 import sys
@@ -88,7 +86,7 @@ class StatusChecker(ResultVisitor):
         pass
 
 
-class Expected(object):
+class Expected:
 
     def __init__(self, doc):
         self.status = self._get_status(doc)
@@ -108,7 +106,7 @@ class Expected(object):
         return [ExpectedLog(item) for item in doc.split('LOG')[1:]]
 
 
-class ExpectedLog(object):
+class ExpectedLog:
 
     def __init__(self, doc):
         index, message = doc.strip().split(' ', 1)
@@ -139,7 +137,7 @@ class ExpectedLog(object):
         return 'INFO', message
 
 
-class BaseChecker(object):
+class BaseChecker:
 
     def _message_matches(self, actual, expected):
         if actual == expected:
