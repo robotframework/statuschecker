@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-from __future__ import print_function
-
 from os.path import abspath, dirname, exists, join
 from platform import python_implementation, python_version
 from shutil import rmtree
