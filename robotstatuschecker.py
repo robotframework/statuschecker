@@ -131,7 +131,7 @@ class ExpectedLog:
         test_setup = False
         test_teardown = False
         for index in kw_index.split("."):
-            if index.upper() == "SUITE":
+            if index.upper() == "SETUP":
                 test_setup = True
                 new_kw_index.append(0)
             elif index.upper() == "TEARDOWN":
