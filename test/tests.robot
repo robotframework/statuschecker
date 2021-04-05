@@ -106,6 +106,20 @@ NONE log message
     No Operation
     Log    Message
 
+Test Setup Check Is Done By SUITE Marker
+    [Documentation]    ...
+    ...    LOG SUITE.2:1    PASS
+    ...    LOG 1:1    KALA
+    [Setup]    Status    PASS
+    Log    KALA
+
+Error When No Setup
+    [Documentation]    ...
+    ...    LOG SUITE.1:1    PASS
+    ...    LOG 2:1    KALA
+    Status    FAIL    Expected test setup but setup is not present.
+    Log    KALA
+
 Expected FAIL and log messages
     [Documentation]    This text is ignored. FAIL Told ya!!
     ...    LOG 2 Failing soon!
