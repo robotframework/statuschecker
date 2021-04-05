@@ -108,6 +108,7 @@ NONE log message
 
 Test Setup Check Is Done By SUITE Marker
     [Documentation]    ...
+    ...    LOG SUITE:1    NONE
     ...    LOG SUITE.2:1    PASS
     ...    LOG 1:1    KALA
     [Setup]    Status    PASS
