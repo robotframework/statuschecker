@@ -41,11 +41,13 @@ from os.path import abspath
 import re
 import sys
 
+from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 
 __version__ = "1.5.2.dev1"
+RF3 = rf_version.startswith("3")
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -215,6 +217,10 @@ class TestStatusChecker(BaseChecker):
 
 
 class LogMessageChecker(BaseChecker):
+
+    _no_setup_message = "Expected test setup but setup is not present."
+    _no_teardown_message = "Expected test teardown but teardown is not present."
+
     def __init__(self, expected):
         self.logs = expected.logs
 
@@ -228,22 +234,46 @@ class LogMessageChecker(BaseChecker):
         kw = None
         try:
             for index in expected.kw_index:
-                if expected.test_setup and not test.keywords.setup:
-                    message = "Expected test setup but setup is not present."
-                    self._fail(test, message)
-                    return None
-                if expected.test_teardown and not test.keywords.teardown:
-                    message = "Expected test setup but setup is not present."
-                    self._fail(test, message)
-                    return None
-                if test.keywords.setup and not expected.test_setup:
-                    index += 1
-                kw = (kw or test).keywords[index]
+                kw = self._get_keyword_rf3_rf4(test, expected, kw, index)
+                if kw is None:
+                    return kw
             return kw
         except IndexError:
             message = f"No keyword with index '{expected.kw_index_str}'."
             self._fail(test, message)
             return None
+
+    def _get_keyword_rf3_rf4(self, test, expected, kw, index):
+        if RF3:
+            return self._get_keyword_rf3(test, expected, kw, index)
+        return self._get_keyword_rf4(test, expected, kw, index)
+
+    def _get_keyword_rf3(self, test, expected, kw, index):
+        if expected.test_setup and not test.keywords.setup:
+            self._fail(test, self._no_setup_message)
+            return None
+        if expected.test_teardown and not test.keywords.teardown:
+            self._fail(test, self._no_teardown_message)
+            return None
+        if test.keywords.setup and not expected.test_setup:
+            index += 1
+        kw = (kw or test).keywords[index]
+        return kw
+
+    def _get_keyword_rf4(self, test, expected, kw, index):
+        if expected.test_setup and not test.setup:
+            self._fail(test, self._no_setup_message)
+            return None
+        if expected.test_teardown and not test.teardown:
+            self._fail(test, self._no_teardown_message)
+            return None
+        if expected.test_setup and not kw:
+            kw = test.setup
+        elif expected.test_teardown and not kw:
+            kw = test.teardown
+        else:
+            kw = (kw or test).body[index]
+        return kw
 
     def _check_message(self, test, kw, expected):
         try:

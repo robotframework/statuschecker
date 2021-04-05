@@ -131,7 +131,7 @@ Test Teardown Check Is Done By TEARDOWN Marker
 
 Error When No Teardown
     [Documentation]    LOG TEARDOWN:1   foobar
-    Status    FAIL    Expected test setup but setup is not present.
+    Status    FAIL    Expected test teardown but teardown is not present.
     Log    KALA
 
 Expected FAIL and log messages
