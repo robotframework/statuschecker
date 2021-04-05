@@ -133,8 +133,10 @@ class ExpectedLog:
         for index in kw_index.split("."):
             if index.upper() == "SUITE":
                 test_setup = True
+                new_kw_index.append(0)
             elif index.upper() == "TEARDOWN":
                 test_teardown = True
+                new_kw_index.append(-1)
             else:
                 new_kw_index.append(int(index) - 1)
         msg_index = int(msg_index) - 1
@@ -226,13 +228,11 @@ class LogMessageChecker(BaseChecker):
         kw = None
         try:
             for index in expected.kw_index:
-                if expected.test_setup and test.keywords.setup:
-                    kw = test.keywords.setup
-                elif expected.test_setup and not test.keywords.setup:
+                if expected.test_setup and not test.keywords.setup:
                     message = "Expected test setup but setup is not present."
                     self._fail(test, message)
                     return None
-                elif test.keywords.setup:
+                if test.keywords.setup and not expected.test_setup:
                     index += 1
                 kw = (kw or test).keywords[index]
             return kw
