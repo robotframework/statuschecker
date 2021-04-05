@@ -106,8 +106,12 @@ class Expected:
 
 class ExpectedLog:
     def __init__(self, doc):
-        index, message = doc.strip().split(" ", 1)
-        self.kw_index, self.msg_index = self._split_index(index)
+        index, message = doc.strip().split(' ', 1)
+        test_setup, kw_index, msg_index, test_teardown = self._split_index(index)
+        self.test_setup = test_setup
+        self.kw_index = kw_index
+        self.msg_index = msg_index
+        self.test_teardown = test_teardown
         self.level, self.message = self._split_level(message)
 
     @property
@@ -123,9 +127,18 @@ class ExpectedLog:
             kw_index, msg_index = index.split(":")
         else:
             kw_index, msg_index = index, 1
-        kw_index = [int(index) - 1 for index in kw_index.split(".")]
+        new_kw_index = []
+        test_setup = False
+        test_teardown = False
+        for index in kw_index.split("."):
+            if index.upper() == "SUITE":
+                test_setup = True
+            elif index.upper() == "TEARDOWN":
+                test_teardown = True
+            else:
+                new_kw_index.append(int(index) - 1)
         msg_index = int(msg_index) - 1
-        return kw_index, msg_index
+        return test_setup, new_kw_index, msg_index, test_teardown
 
     def _split_level(self, message):
         for level in ["TRACE", "DEBUG", "INFO", "WARN", "FAIL", "ERROR"]:
@@ -213,6 +226,14 @@ class LogMessageChecker(BaseChecker):
         kw = None
         try:
             for index in expected.kw_index:
+                if expected.test_setup and test.keywords.setup:
+                    kw = test.keywords.setup
+                elif expected.test_setup and not test.keywords.setup:
+                    message = "Expected test setup but setup is not present."
+                    self._fail(test, message)
+                    return None
+                elif test.keywords.setup:
+                    index += 1
                 kw = (kw or test).keywords[index]
             return kw
         except IndexError:
