@@ -64,6 +64,9 @@ If a test is expected to *PASS* with a certain message, the word
 ``PASS`` must be added to its documentation explicitly and the
 expected message given after that.
 
+If a message check should happen in test setup or teardown, that check
+must be prefixed with ``SETUP`` or ``TEARDOWN`` word.
+
 The expected message can also be specified as a regular expression by
 prefixing it with ``REGEXP:``. The specified regular expression
 must match the error message fully. Having spaces between the status,
@@ -85,6 +88,11 @@ statuses and messages:
     *** Test Cases ***
     Simple failure
         [Documentation]    FAIL Expected error message
+        Steps
+
+    Check in test setup is done by SETUP marker
+        [Documentation]    LOG SETUP    This first log message in test setup
+        [Setup]    Test specific setup
         Steps
 
     Exclude documentation before marker

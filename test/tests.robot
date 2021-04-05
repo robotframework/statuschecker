@@ -106,23 +106,26 @@ NONE log message
     No Operation
     Log    Message
 
-Test Setup Check Is Done By SUITE Marker
+Test Setup Check Is Done By SETUP Marker
     [Documentation]    ...
-    ...    LOG SUITE:1    NONE
-    ...    LOG SUITE.2:1    PASS
+    ...    LOG SETUP:1    NONE
+    ...    LOG SETUP.2:1    PASS
+    ...    LOG SETUP.2    PASS
     ...    LOG 1:1    KALA
     [Setup]    Status    PASS
     Log    KALA
 
 Error When No Setup
     [Documentation]    ...
-    ...    LOG SUITE.1:1    PASS
+    ...    LOG SETUP.1:1    PASS
     ...    LOG 2:1    KALA
     Status    FAIL    Expected test setup but setup is not present.
     Log    KALA
 
 Test Teardown Check Is Done By TEARDOWN Marker
-    [Documentation]    LOG TEARDOWN:1   foobar
+    [Documentation]    ...
+    ...    LOG TEARDOWN:1   foobar
+    ...    LOG TEARDOWN     foobar
     Status    PASS
     [Teardown]    Log    foobar
 
