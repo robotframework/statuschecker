@@ -232,6 +232,10 @@ class LogMessageChecker(BaseChecker):
                     message = "Expected test setup but setup is not present."
                     self._fail(test, message)
                     return None
+                if expected.test_teardown and not test.keywords.teardown:
+                    message = "Expected test setup but setup is not present."
+                    self._fail(test, message)
+                    return None
                 if test.keywords.setup and not expected.test_setup:
                     index += 1
                 kw = (kw or test).keywords[index]

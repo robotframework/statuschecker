@@ -121,6 +121,16 @@ Error When No Setup
     Status    FAIL    Expected test setup but setup is not present.
     Log    KALA
 
+Test Teardown Check Is Done By TEARDOWN Marker
+    [Documentation]    LOG TEARDOWN:1   foobar
+    Status    PASS
+    [Teardown]    Log    foobar
+
+Error When No Teardown
+    [Documentation]    LOG TEARDOWN:1   foobar
+    Status    FAIL    Expected test setup but setup is not present.
+    Log    KALA
+
 Expected FAIL and log messages
     [Documentation]    This text is ignored. FAIL Told ya!!
     ...    LOG 2 Failing soon!
