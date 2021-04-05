@@ -257,8 +257,7 @@ class LogMessageChecker(BaseChecker):
             return None
         if test.keywords.setup and not expected.test_setup:
             index += 1
-        kw = (kw or test).keywords[index]
-        return kw
+        return (kw or test).keywords[index]
 
     def _get_keyword_rf4(self, test, expected, kw, index):
         if expected.test_setup and not test.setup:
