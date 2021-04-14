@@ -11,6 +11,8 @@ from robot.api import ExecutionResult, ResultVisitor
 CURDIR = dirname(abspath(__file__))
 sys.path.insert(0, dirname(CURDIR))
 
+from robot.version import VERSION
+
 from robotstatuschecker import process_output
 from robotstatuschecker import RF3
 
@@ -21,6 +23,7 @@ def check_tests(robot_file):
     checker = StatusCheckerChecker()
     result.suite.visit(checker)
     checker.print_status()
+    print(f"Robot Framework version: {VERSION}")
     sys.exit(len(checker.errors))
 
 
