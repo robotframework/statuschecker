@@ -108,7 +108,7 @@ class Expected:
 
 class ExpectedLog:
     def __init__(self, doc):
-        index, message = doc.strip().split(' ', 1)
+        index, message = doc.strip().split(" ", 1)
         test_setup, kw_index, msg_index, test_teardown = self._split_index(index)
         self.test_setup = test_setup
         self.kw_index = kw_index
@@ -256,7 +256,11 @@ class LogMessageChecker(BaseChecker):
         if expected.test_teardown and not test.keywords.teardown:
             self._fail(test, self._no_teardown_message)
             return None
-        if test.keywords.setup and not expected.test_setup and not expected.visited_setup:
+        if (
+            test.keywords.setup
+            and not expected.test_setup
+            and not expected.visited_setup
+        ):
             index += 1
             expected.visited_setup = True
         return (kw or test).keywords[index]
@@ -281,9 +285,7 @@ class LogMessageChecker(BaseChecker):
             msg = kw.messages[expected.msg_index]
         except IndexError:
             condition = expected.message == "NONE"
-            message = (
-                f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not have message {expected.msg_index_str}."
-            )
+            message = f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not have message {expected.msg_index_str}."
             self._assert(condition, test, message)
         else:
             if self._check_msg_level(test, kw, msg, expected):
