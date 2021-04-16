@@ -178,6 +178,13 @@ Expected PASS and log messages
     Log    Any time now...
     Pass Execution    Told ya!!
 
+Expected PASS and teadown does not affect
+    [Documentation]    This text is ignored.
+    ...    LOG 2 Passing soon!
+    Status    PASS    ${EMPTY}
+    Log    Passing soon!
+    [Teardown]    Log    This is logged
+
 FAILURE: Unexpected PASS
     [Documentation]    FAIL Expected failure does not occur
     Status    FAIL    Test was expected to FAIL but it PASSED.
@@ -208,12 +215,6 @@ FAILURE: Wrong log message
     ...    Expected:\nHello world!\n\n
     ...    Actual:\nHi world!
     Log    Hi world!
-
-FAILURE: Access teardown without TEADOWN
-    [Documentation]    LOG 3:1 Hi from teardown
-    Status    FAIL    In test 'FAILURE: Access teardown without TEADOWN' keyword is in teardown but was expected to ne in test body index 3
-    Log    Hi world!
-    [Teardown]    Log   Hi from teardown
 
 FAILURE: Wrong log level
     [Documentation]    LOG 2.1 Hello world!

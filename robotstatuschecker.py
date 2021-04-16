@@ -262,12 +262,6 @@ class LogMessageChecker(BaseChecker):
         if expected.test_teardown and not test.keywords.teardown:
             self._fail(test, self._no_teardown_message.format(test.name))
             return None
-        if not expected.test_teardown and test.keywords.teardown:
-            self._fail(
-                test,
-                self._teardown_access_message.format(test.name, expected.kw_index_str),
-            )
-            return None
         if (
             test.keywords.setup
             and not expected.test_setup
@@ -283,12 +277,6 @@ class LogMessageChecker(BaseChecker):
             return None
         if expected.test_teardown and not test.teardown:
             self._fail(test, self._no_teardown_message.format(test.name))
-            return None
-        if not expected.test_teardown and test.teardown:
-            self._fail(
-                test,
-                self._teardown_access_message.format(test.name, expected.kw_index_str),
-            )
             return None
         if expected.test_setup and not kw:
             kw = test.setup
