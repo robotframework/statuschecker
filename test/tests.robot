@@ -140,7 +140,7 @@ Error When No Setup
     [Documentation]    ...
     ...    LOG SETUP.1:1    PASS
     ...    LOG 2:1    KALA
-    Status    FAIL    Expected test setup but setup is not present.
+    Status    FAIL    Expected test Error When No Setup to have setup but setup is not present.
     Log    KALA
 
 Test Teardown Check Is Done By TEARDOWN Marker
@@ -152,7 +152,7 @@ Test Teardown Check Is Done By TEARDOWN Marker
 
 Error When No Teardown
     [Documentation]    LOG TEARDOWN:1   foobar
-    Status    FAIL    Expected test teardown but teardown is not present.
+    Status    FAIL    Expected test Error When No Teardown to have teardown but teardown is not present.
     Log    KALA
 
 Expected FAIL and log messages
@@ -208,6 +208,12 @@ FAILURE: Wrong log message
     ...    Expected:\nHello world!\n\n
     ...    Actual:\nHi world!
     Log    Hi world!
+
+FAILURE: Access teardown without TEADOWN
+    [Documentation]    LOG 3:1 Hi from teardown
+    Status    FAIL    In test 'FAILURE: Access teardown without TEADOWN' keyword is in teardown but was expected to ne in test body index 3
+    Log    Hi world!
+    [Teardown]    Log   Hi from teardown
 
 FAILURE: Wrong log level
     [Documentation]    LOG 2.1 Hello world!

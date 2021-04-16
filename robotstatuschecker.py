@@ -219,8 +219,14 @@ class TestStatusChecker(BaseChecker):
 
 class LogMessageChecker(BaseChecker):
 
-    _no_setup_message = "Expected test setup but setup is not present."
-    _no_teardown_message = "Expected test teardown but teardown is not present."
+    _no_setup_message = "Expected test {} to have setup but setup is not present."
+    _no_teardown_message = (
+        "Expected test {} to have teardown but teardown is not present."
+    )
+    _teardown_access_message = (
+        "In test '{}' keyword is in teardown but "
+        "was expected to ne in test body index {}"
+    )
 
     def __init__(self, expected):
         self.logs = expected.logs
@@ -251,10 +257,16 @@ class LogMessageChecker(BaseChecker):
 
     def _get_keyword_rf3(self, test, expected, kw, index):
         if expected.test_setup and not test.keywords.setup:
-            self._fail(test, self._no_setup_message)
+            self._fail(test, self._no_setup_message.format(test.name))
             return None
         if expected.test_teardown and not test.keywords.teardown:
-            self._fail(test, self._no_teardown_message)
+            self._fail(test, self._no_teardown_message.format(test.name))
+            return None
+        if not expected.test_teardown and test.keywords.teardown:
+            self._fail(
+                test,
+                self._teardown_access_message.format(test.name, expected.kw_index_str),
+            )
             return None
         if (
             test.keywords.setup
@@ -267,10 +279,16 @@ class LogMessageChecker(BaseChecker):
 
     def _get_keyword_rf4(self, test, expected, kw, index):
         if expected.test_setup and not test.setup:
-            self._fail(test, self._no_setup_message)
+            self._fail(test, self._no_setup_message.format(test.name))
             return None
         if expected.test_teardown and not test.teardown:
-            self._fail(test, self._no_teardown_message)
+            self._fail(test, self._no_teardown_message.format(test.name))
+            return None
+        if not expected.test_teardown and test.teardown:
+            self._fail(
+                test,
+                self._teardown_access_message.format(test.name, expected.kw_index_str),
+            )
             return None
         if expected.test_setup and not kw:
             kw = test.setup
