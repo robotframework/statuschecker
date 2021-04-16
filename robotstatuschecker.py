@@ -115,6 +115,7 @@ class ExpectedLog:
         self.msg_index = msg_index
         self.test_teardown = test_teardown
         self.level, self.message = self._split_level(message)
+        self.visited_setup = False
 
     @property
     def kw_index_str(self):
@@ -255,8 +256,9 @@ class LogMessageChecker(BaseChecker):
         if expected.test_teardown and not test.keywords.teardown:
             self._fail(test, self._no_teardown_message)
             return None
-        if test.keywords.setup and not expected.test_setup:
+        if test.keywords.setup and not expected.test_setup and not expected.visited_setup:
             index += 1
+            expected.visited_setup = True
         return (kw or test).keywords[index]
 
     def _get_keyword_rf4(self, test, expected, kw, index):

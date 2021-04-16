@@ -72,13 +72,34 @@ Trailing and leading whitespace is ignored in log messages
     Log    ${SPACE*10}xxx${SPACE*10}
 
 Log messages deeper
-    [Documentation]    LOG 2:1 Hello LOG 2:2 World
+    [Documentation]
+    ...    LOG 2:1 Hello
+    ...    LOG 2:2 World
     ...    LOG 3.1 DEBUG User Keyword
-    ...    LOG 4.1:1 User LOG 4.1:2 Keyword
+    ...    LOG 4.1:1 User
+    ...    LOG 4.1:2 Keyword
+    ...    LOG 5.1:2 DEBUG STARTS: Traceback (most recent call last):
     Status    PASS
     Log Many    Hello    World
     Logging User Keyword
     Logging User Keyword 2
+    Run Keyword And Ignore Error
+    ...    Fail    My Error Here
+
+Log messages deeper with setup
+    [Documentation]
+    ...    LOG 1:1 Hello
+    ...    LOG 1:2 World
+    ...    LOG 2.1 DEBUG User Keyword
+    ...    LOG 3.1:1 User
+    ...    LOG 3.1:2 Keyword
+    ...    LOG 4.1:2 DEBUG STARTS: Traceback (most recent call last):
+    [Setup]    Status    PASS
+    Log Many    Hello    World
+    Logging User Keyword
+    Logging User Keyword 2
+    Run Keyword And Ignore Error
+    ...    Fail    My Error Here
 
 Log message with REGEXP
     [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
