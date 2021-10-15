@@ -7,6 +7,7 @@ import sys
 
 from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
+from robot.output.console.highlighting import HighlightingStream
 
 CURDIR = dirname(abspath(__file__))
 sys.path.insert(0, dirname(CURDIR))
@@ -75,13 +76,17 @@ class StatusCheckerChecker(ResultVisitor):
         return 'Expected %s to be "%s" but it was "%s".' % (explanation, expected, actual)
 
     def print_status(self):
+        sout = HighlightingStream(sys.stdout)
         print()
         if self.errors:
-            print("%d/%d test failed:" % (len(self.errors), self.tests))
-            print("\n-------------------------------------\n".join(self.errors))
+            sout.error("%d/%d test failed:" % (len(self.errors), self.tests), "FAIL")
+            for err_line in "\n-------------------------------------\n".join(self.errors).splitlines():
+                sout.error(err_line, "FAIL")
         else:
-            print("All %d tests passed/failed/logged as expected." % self.tests)
-        print("Run on %s %s." % (python_implementation(), python_version()))
+            sout.write('[ ', flush=False)
+            sout.highlight("PASS", flush=False)
+            sout.write(' ] All %d tests passed/failed/logged as expected.\n' % self.tests)
+        print("-------------------------------------\nRun on %s %s." % (python_implementation(), python_version()))
 
 
 if __name__ == "__main__":

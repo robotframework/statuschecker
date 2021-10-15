@@ -123,7 +123,7 @@ class ExpectedLog:
 
     @property
     def msg_index_str(self):
-        return str(self.msg_index + 1)
+        return str(self.msg_index + 1) if isinstance(self.msg_index, int) else self.msg_index
 
     def _split_index(self, index):
         if ":" in index:
@@ -142,11 +142,11 @@ class ExpectedLog:
                 new_kw_index.append(-1)
             else:
                 new_kw_index.append(int(index) - 1)
-        msg_index = int(msg_index) - 1
+        msg_index = "*" if msg_index=="*" else int(msg_index) - 1
         return test_setup, new_kw_index, msg_index, test_teardown
 
     def _split_level(self, message):
-        for level in ["TRACE", "DEBUG", "INFO", "WARN", "FAIL", "ERROR"]:
+        for level in ["TRACE", "DEBUG", "INFO", "WARN", "FAIL", "ERROR", "ANY"]:
             if message.startswith(level):
                 return level, message[len(level) :].strip()
         return "INFO", message
@@ -171,9 +171,9 @@ class BaseChecker:
                 return True
         return False
 
-    def _assert(self, condition, test, message):
+    def _assert(self, condition, test, message, fail=True):
         if not condition:
-            return self._fail(test, message)
+            return self._fail(test, message) if fail else False
         return True
 
     def _fail(self, test, message):
@@ -287,31 +287,46 @@ class LogMessageChecker(BaseChecker):
         return kw
 
     def _check_message(self, test, kw, expected):
-        try:
-            msg = kw.messages[expected.msg_index]
-        except IndexError:
-            condition = expected.message == "NONE"
-            message = f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not have message {expected.msg_index_str}."
-            self._assert(condition, test, message)
+        if expected.msg_index != "*":
+            try:
+                    msg = kw.messages[expected.msg_index]
+            except IndexError:
+                condition = expected.message == "NONE"
+                message = f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not have message {expected.msg_index_str}."
+                self._assert(condition, test, message)
+            else:
+                if self._check_msg_level(test, kw, msg, expected):
+                    self._check_msg_message(test, kw, msg, expected)
         else:
-            if self._check_msg_level(test, kw, msg, expected):
-                self._check_msg_message(test, kw, msg, expected)
+            if expected.message == "NONE":
+                message = f"Message index wildcard '*' is not supported with expected message 'NONE'"
+                self._fail(test, message)
+                return
+
+            for msg in kw.messages:
+                if self._check_msg_message(test, kw, msg, expected, fail=False):
+                    self._check_msg_level(test, kw, msg, expected)
+                    break
+            else:
+                message = f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not contain any logs with message '{expected.message}'"
+                self._fail(test, message)
+
 
     def _check_msg_level(self, test, kw, msg, expected):
-        condition = msg.level == expected.level
+        condition = msg.level == expected.level if expected.level != "ANY" else True
         message = (
             f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong level."
             f"\n\nExpected: {expected.level}\nActual: {msg.level}"
         )
         return self._assert(condition, test, message)
 
-    def _check_msg_message(self, test, kw, msg, expected):
+    def _check_msg_message(self, test, kw, msg, expected, fail=True):
         condition = self._message_matches(msg.message.strip(), expected.message)
         message = (
             f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong content."
             f"\n\nExpected:\n{expected.message}\n\nActual:\n{msg.message}"
         )
-        return self._assert(condition, test, message)
+        return self._assert(condition, test, message, fail)
 
 
 if __name__ == "__main__":

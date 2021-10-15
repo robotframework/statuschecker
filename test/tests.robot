@@ -101,6 +101,36 @@ Log messages deeper with setup
     Run Keyword And Ignore Error
     ...    Fail    My Error Here
 
+Log messages deeper with wildcard
+    [Documentation]
+    ...    LOG 2:1 Hello
+    ...    LOG 2:2 ANY World
+    ...    LOG 3.1 DEBUG User Keyword
+    ...    LOG 4.1:* User
+    ...    LOG 4.1:* ANY Keyword
+    ...    LOG 5.1:* DEBUG STARTS: Traceback (most recent call last):
+    Status    PASS
+    Log Many    Hello    World
+    Logging User Keyword
+    Logging User Keyword 2
+    Run Keyword And Ignore Error
+    ...    Fail    My Error Here
+
+Log messages deeper with wildcard and setup
+    [Documentation]
+    ...    LOG 1:1 Hello
+    ...    LOG 1:2 ANY World
+    ...    LOG 2.1 DEBUG User Keyword
+    ...    LOG 3.1:* User
+    ...    LOG 3.1:* ANY Keyword
+    ...    LOG 4.1:* DEBUG STARTS: Traceback (most recent call last):
+    [Setup]    Status    PASS
+    Log Many    Hello    World
+    Logging User Keyword
+    Logging User Keyword 2
+    Run Keyword And Ignore Error
+    ...    Fail    My Error Here
+
 Log message with REGEXP
     [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
     ...    LOG 3 REGEXP: Multi.*message
@@ -143,6 +173,22 @@ Error When No Setup
     Status    FAIL    Expected test Error When No Setup to have setup but setup is not present.
     Log    KALA
 
+Test Setup Check Is Done By SETUP Marker and wildcard is used
+    [Documentation]    ...
+    ...    LOG SETUP:1    NONE
+    ...    LOG SETUP.2:*    PASS
+    ...    LOG SETUP.2    PASS
+    ...    LOG 1:*    HAUKI
+    [Setup]    Status    PASS
+    Log    HAUKI
+
+Error When No Setup and wildcard is used
+    [Documentation]    ...
+    ...    LOG SETUP.1:*    PASS
+    ...    LOG 2:*    KALA
+    Status    FAIL    Expected test Error When No Setup and wildcard is used to have setup but setup is not present.
+    Log    KALA
+
 Test Teardown Check Is Done By TEARDOWN Marker
     [Documentation]    ...
     ...    LOG TEARDOWN:1   foobar
@@ -154,6 +200,23 @@ Error When No Teardown
     [Documentation]    LOG TEARDOWN:1   foobar
     Status    FAIL    Expected test Error When No Teardown to have teardown but teardown is not present.
     Log    KALA
+
+Test Teardown Check Is Done By TEARDOWN Marker and wildcard is used
+    [Documentation]    ...
+    ...    LOG TEARDOWN:*   foobar
+    ...    LOG TEARDOWN     foobar
+    Status    PASS
+    [Teardown]    Log    foobar
+
+Error When No Teardown and wildcard is used
+    [Documentation]    LOG TEARDOWN:*   foobar
+    Status    FAIL    Expected test Error When No Teardown and wildcard is used to have teardown but teardown is not present.
+    Log    KALA
+
+Error When NONE is used with wildcard
+    [Documentation]    LOG 2.1:* INFO NONE
+    Status    FAIL    Message index wildcard '*' is not supported with expected message 'NONE'
+    Logging User Keyword 2
 
 Expected FAIL and log messages
     [Documentation]    This text is ignored. FAIL Told ya!!
@@ -238,6 +301,10 @@ FAILURE: Non-existing log message
     [Documentation]    LOG 2:2 No message here
     Status    FAIL    Keyword 'BuiltIn.Log' (index 2) does not have message 2.
     Log    Message
+
+FAILURE: Non-existing log message wildcard
+    [Documentation]    LOG 1:* Bogus message
+    Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with message 'Bogus message'
 
 *** Keywords ***
 Logging User Keyword
