@@ -1,7 +1,6 @@
 *** Settings ***
-Suite Setup        Log    Suite setup
-Suite Teardown     Log    Suite teardown
-
+Suite Setup         Log    Suite setup
+Suite Teardown      Log    Suite teardown
 
 *** Test Cases ***
 Implicit PASS
@@ -145,13 +144,13 @@ Error When No Setup
 
 Test Teardown Check Is Done By TEARDOWN Marker
     [Documentation]    ...
-    ...    LOG TEARDOWN:1   foobar
-    ...    LOG TEARDOWN     foobar
+    ...    LOG TEARDOWN:1    foobar
+    ...    LOG TEARDOWN    foobar
     Status    PASS
     [Teardown]    Log    foobar
 
 Error When No Teardown
-    [Documentation]    LOG TEARDOWN:1   foobar
+    [Documentation]    LOG TEARDOWN:1    foobar
     Status    FAIL    Expected test Error When No Teardown to have teardown but teardown is not present.
     Log    KALA
 

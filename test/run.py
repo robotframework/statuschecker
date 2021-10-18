@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
+import sys
 from os.path import abspath, dirname, exists, join
 from platform import python_implementation, python_version
 from shutil import rmtree
-import sys
 
 from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
@@ -11,10 +11,10 @@ from robot.api import ExecutionResult, ResultVisitor
 CURDIR = dirname(abspath(__file__))
 sys.path.insert(0, dirname(CURDIR))
 
-from robot.version import VERSION
+from robot.version import VERSION  # noqa
 
-from robotstatuschecker import process_output
-from robotstatuschecker import RF3
+from robotstatuschecker import process_output  # noqa
+from robotstatuschecker import RF3  # noqa
 
 
 def check_tests(robot_file):
@@ -46,7 +46,10 @@ class StatusCheckerChecker(ResultVisitor):
     def visit_test(self, test):
         self.tests += 1
         status, message = self._get_expected(test)
-        errors = [self._verify(test.status, status, "status"), self._verify(test.message, message, "message")]
+        errors = [
+            self._verify(test.status, status, "status"),
+            self._verify(test.message, message, "message"),
+        ]
         errors = ["- %s" % e for e in errors if e]
         if errors:
             self.errors.append("%s:\n%s" % (test.name, "\n".join(errors)))
@@ -61,8 +64,7 @@ class StatusCheckerChecker(ResultVisitor):
             kw = test.body[0]
         else:
             kw = test.setup
-        return (kw.body[1].messages[0].message,
-                kw.body[2].messages[0].message)
+        return (kw.body[1].messages[0].message, kw.body[2].messages[0].message)
 
     def _get_expected_rf3(self, test):
         kw = test.keywords[0]
