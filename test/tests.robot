@@ -109,12 +109,16 @@ Log messages deeper with wildcard
     ...    LOG 4.1:* User
     ...    LOG 4.1:* ANY Keyword
     ...    LOG 5.1:* DEBUG STARTS: Traceback (most recent call last):
+    ...    LOG 6.1:* ANY REGEXP: .*recent.*
+    ...    LOG 6.1:* DEBUG REGEXP: .*recent.*
     Status    PASS
     Log Many    Hello    World
     Logging User Keyword
     Logging User Keyword 2
     Run Keyword And Ignore Error
     ...    Fail    My Error Here
+    Run Keyword And Ignore Error
+    ...    Fail    'recent call' in two different log levels
 
 Log messages deeper with wildcard and setup
     [Documentation]
@@ -215,7 +219,7 @@ Error When No Teardown and wildcard is used
 
 Error When NONE is used with wildcard
     [Documentation]    LOG 2.1:* INFO NONE
-    Status    FAIL    Message index wildcard '*' is not supported with expected message 'NONE'
+    Status    FAIL    Message index wildcard '*' is not supported with expected message 'NONE'.
     Logging User Keyword 2
 
 Expected FAIL and log messages
@@ -304,7 +308,7 @@ FAILURE: Non-existing log message
 
 FAILURE: Non-existing log message wildcard
     [Documentation]    LOG 1:* Bogus message
-    Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with message 'Bogus message'
+    Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with level INFO and message 'Bogus message'.
 
 *** Keywords ***
 Logging User Keyword
