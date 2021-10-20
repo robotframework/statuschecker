@@ -134,11 +134,14 @@ The part after the colon species the message. For example, ``1:2``
 means the second message of the first keyword and ``1.2:3`` is
 the third message of the second child keyword of the first keyword.
 The message index is optional and defaults to ``1``.
+The message index also supports wildcard ``*``. For example ``1:*``
+matches any message of the first keyword.
 
 Message level is specified before the actual message, and it can be
 any of the valid log levels in capital letters. If the level is not
 given it defaults to ``INFO``. Starting from 1.4 release also
-``ERROR`` level is supported.
+``ERROR`` level is supported. The message level also supports wildcard
+``ANY`` which will match all log levels.
 
 Possible leading and trailing whitespace is ignored both in the expected
 and in the actual log message.
