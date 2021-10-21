@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from invoke import task
-from rellu import initialize_labels, ReleaseNotesGenerator, Version
+from rellu import ReleaseNotesGenerator, Version, initialize_labels
 from rellu.tasks import clean  # noqa
 
 VERSION_PATTERN = '__version__ = "(.*)"'
@@ -20,7 +20,8 @@ StatusChecker project is hosted at GitHub and downloads are at PyPI_
 .. _Robot Framework: http://robotframework.org
 .. _PyPI: https://github.com/robotframework/statuschecker
 .. _issue tracker: https://github.com/robotframework/SeleniumLibrary/issues?q=milestone%3A{version.milestone}
-"""
+"""  # noqa
+
 
 @task
 def set_version(ctx, version):
@@ -68,9 +69,7 @@ def release_notes(ctx, version=None, username=None, password=None, write=False):
     folder = RELEASE_NOTES_PATH.parent.resolve()
     folder.mkdir(parents=True, exist_ok=True)
     file = RELEASE_NOTES_PATH if write else sys.stdout
-    generator = ReleaseNotesGenerator(
-        REPOSITORY, RELEASE_NOTES_TITLE, RELEASE_NOTES_INTRO
-    )
+    generator = ReleaseNotesGenerator(REPOSITORY, RELEASE_NOTES_TITLE, RELEASE_NOTES_INTRO)
     generator.generate(version, username, password, file)
 
 
@@ -86,3 +85,25 @@ def init_labels(ctx, username=None, password=None):
     when labels it uses have changed.
     """
     initialize_labels(REPOSITORY, username, password)
+
+
+@task
+def lint(ctx):
+    """Run linters
+
+    Flake8, Black and robotframework-tidy
+    """
+    ctx.run("black --config pyproject.toml tasks.py robotstatuschecker.py")
+    ctx.run("flake8 --config .flake8 tasks.py robotstatuschecker.py")
+    ctx.run("isort tasks.py robotstatuschecker.py")
+    tidy_command = [
+        "robotidy",
+        "--lineseparator",
+        "unix",
+        "--configure",
+        "NormalizeAssignments:equal_sign_type=space_and_equal_sign",
+        "--configure",
+        "NormalizeAssignments:equal_sign_type_variables=space_and_equal_sign",
+        "test",
+    ]
+    ctx.run(" ".join(tidy_command))
