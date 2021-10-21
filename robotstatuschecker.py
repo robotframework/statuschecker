@@ -37,14 +37,13 @@ Programmatic usage:
 If an output file is not given, the input file is edited in place.
 """
 
-from os.path import abspath
 import re
 import sys
+from os.path import abspath
 
 from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
-
 
 __version__ = "2.0.4.dev1"
 RF3 = rf_version.startswith("3")
@@ -220,12 +219,9 @@ class TestStatusChecker(BaseChecker):
 class LogMessageChecker(BaseChecker):
 
     _no_setup_message = "Expected test {} to have setup but setup is not present."
-    _no_teardown_message = (
-        "Expected test {} to have teardown but teardown is not present."
-    )
+    _no_teardown_message = "Expected test {} to have teardown but teardown is not present."
     _teardown_access_message = (
-        "In test '{}' keyword is in teardown but "
-        "was expected to ne in test body index {}"
+        "In test '{}' keyword is in teardown but " "was expected to ne in test body index {}"
     )
 
     def __init__(self, expected):
@@ -262,11 +258,7 @@ class LogMessageChecker(BaseChecker):
         if expected.test_teardown and not test.keywords.teardown:
             self._fail(test, self._no_teardown_message.format(test.name))
             return None
-        if (
-            test.keywords.setup
-            and not expected.test_setup
-            and not expected.visited_setup
-        ):
+        if test.keywords.setup and not expected.test_setup and not expected.visited_setup:
             index += 1
             expected.visited_setup = True
         return (kw or test).keywords[index]
@@ -326,7 +318,8 @@ class LogMessageChecker(BaseChecker):
     def _check_msg_level(self, test, kw, msg, expected, fail=True):
         condition = msg.level == expected.level if expected.level != "ANY" else True
         message = (
-            f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong level."
+            f"Keyword '{kw.name}' (index {expected.kw_index_str}) "
+            f"message {expected.msg_index_str} has wrong level."
             f"\n\nExpected: {expected.level}\nActual: {msg.level}"
         )
         return self._assert(condition, test, message, fail)
@@ -334,7 +327,8 @@ class LogMessageChecker(BaseChecker):
     def _check_msg_message(self, test, kw, msg, expected, fail=True):
         condition = self._message_matches(msg.message.strip(), expected.message)
         message = (
-            f"Keyword '{kw.name}' (index {expected.kw_index_str}) message {expected.msg_index_str} has wrong content."
+            f"Keyword '{kw.name}' (index {expected.kw_index_str}) "
+            f"message {expected.msg_index_str} has wrong content."
             f"\n\nExpected:\n{expected.message}\n\nActual:\n{msg.message}"
         )
         return self._assert(condition, test, message, fail)
