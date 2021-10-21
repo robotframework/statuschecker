@@ -294,7 +294,7 @@ class LogMessageChecker(BaseChecker):
 
     def _check_message_by_wildcard(self, test, kw, expected):
         if expected.message == "NONE":
-            message = f"Message index wildcard '*' is not supported with expected message 'NONE'."
+            message = "Message index wildcard '*' is not supported with expected message 'NONE'."
             self._fail(test, message)
             return
 

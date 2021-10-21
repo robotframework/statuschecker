@@ -206,14 +206,15 @@ Error When No Teardown
 
 Test Teardown Check Is Done By TEARDOWN Marker and wildcard is used
     [Documentation]    ...
-    ...    LOG TEARDOWN:*   foobar
-    ...    LOG TEARDOWN     foobar
+    ...    LOG TEARDOWN:*    foobar
+    ...    LOG TEARDOWN    foobar
     Status    PASS
     [Teardown]    Log    foobar
 
 Error When No Teardown and wildcard is used
-    [Documentation]    LOG TEARDOWN:*   foobar
-    Status    FAIL    Expected test Error When No Teardown and wildcard is used to have teardown but teardown is not present.
+    [Documentation]    LOG TEARDOWN:*    foobar
+    Status    FAIL
+    ...    Expected test Error When No Teardown and wildcard is used to have teardown but teardown is not present.
     Log    KALA
 
 Error When NONE is used with wildcard
