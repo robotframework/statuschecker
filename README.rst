@@ -60,6 +60,12 @@ the word ``FAIL`` (in uppercase) somewhere in the test case
 documentation. The expected error message must then follow
 the ``FAIL`` marker.
 
+For robotframework version 4 you can also change the expected status
+to *SKIP* by adding the word ``SKIP`` in the test case documentation.
+Like Fail, the expected skip message must follow the word ``SKIP``.
+If a test documentation contains the words ``FAIL`` and ``SKIP``, ``SKIP``
+will be ignored and the expected status will be *FAIL*.
+
 If a test is expected to *PASS* with a certain message, the word
 ``PASS`` must be added to its documentation explicitly and the
 expected message given after that.

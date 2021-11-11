@@ -17,3 +17,12 @@ other tests should pass.
 Test statuses and messages set by StatusChecker are verified by ``run.py``.
 Expected statuses and messages are logged by ``Status`` keyword that all
 tests must use as their first keyword.
+
+Test cases that use features only available in RF4+ (e.g. SKIP status) should
+be tagged with
+
+.. sourcecode:: robotframework
+   
+        [Tags]    rf3unsupported
+
+and will be excluded in run.py if the installed robotframework is RF3.

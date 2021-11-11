@@ -93,10 +93,17 @@ class Expected:
         self.logs = self._get_logs(doc)
 
     def _get_status(self, doc):
-        return "FAIL" if "FAIL" in doc else "PASS"
+        if RF3:
+            return "FAIL" if "FAIL" in doc else "PASS"
+        if "FAIL" not in doc:
+            return "SKIP" if "SKIP" in doc else "PASS"
+        return "FAIL"
 
     def _get_message(self, doc):
-        if "FAIL" not in doc and "PASS" not in doc:
+        if RF3:
+            if "FAIL" not in doc and "PASS" not in doc:
+                return ""
+        if all(status not in doc for status in ["FAIL", "SKIP", "PASS"]):
             return ""
         status = self._get_status(doc)
         return doc.split(status, 1)[1].split("LOG", 1)[0].strip()

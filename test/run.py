@@ -32,7 +32,10 @@ def _run_tests_and_process_output(robot_file):
     output = join(results, "output.xml")
     if exists(results):
         rmtree(results)
-    run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG")
+    if RF3:
+        run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG", exclude="rf3unsupported")
+    else: 
+        run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG")
     process_output(output)
     rebot(output, outputdir=results)
     return output
@@ -82,7 +85,10 @@ class StatusCheckerChecker(ResultVisitor):
             print("%d/%d test failed:" % (len(self.errors), self.tests))
             print("\n-------------------------------------\n".join(self.errors))
         else:
-            print("All %d tests passed/failed/logged as expected." % self.tests)
+            if RF3:
+                print("All %d tests passed/failed/logged as expected." % self.tests)
+            else: 
+                print("All %d tests passed/failed/logged/skipped as expected." % self.tests)
         print("Run on %s %s." % (python_implementation(), python_version()))
 
 
