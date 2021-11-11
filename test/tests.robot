@@ -12,11 +12,31 @@ Explicit PASS with message
     Status    PASS    The message
     Pass Execution    The message
 
+Explicit SKIP with message
+    [Documentation]   SKIP The message
+    [Tags]    rf3unsupported
+    Status    SKIP    The message
+    Skip    The message
+
 Expected FAIL
     [Documentation]    FAIL Expected failure
     Status    PASS    Test failed as expected.\n\n
     ...    Original message:\nExpected failure
     Fail    Expected failure
+
+SKIP Plus FAIL Expected FAIL
+    [Documentation]    SKIP FAIL Expected failure
+    [Tags]    rf3unsupported
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nExpected failure
+    Fail    Expected failure
+
+FAIL Plus SKIP Expected FAIL
+    [Documentation]    FAIL Expected failure SKIP
+    [Tags]    rf3unsupported
+    Status    PASS    Test failed as expected.\n\n
+    ...    Original message:\nExpected failure SKIP
+    Fail    Expected failure SKIP
 
 Ignore documentation before marker
     [Documentation]    This text is ignored. FAIL Expected failure
