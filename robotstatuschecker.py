@@ -27,14 +27,21 @@ log messages.
 
 Command-line usage:
 
-    python -m robotstatuschecker infile [outfile]
+    python -m robotstatuschecker infile [outfile] [--quiet]
+    robot --prerebotmodifier robotstatuschecker.StatusChecker data_sources
+    rebot --prerebotmodifier robotstatuschecker.StatusChecker robot_outputs
 
 Programmatic usage:
 
     from robotstatuschecker import process_output
-    process_output('infile.xml', 'outfile.xml')
+    process_output('infile.xml', 'outfile.xml', verbose=True)
 
 If an output file is not given, the input file is edited in place.
+
+By default status checker prints logging to the console. To suppress console
+logging use --quiet on the command line,
+--prerebotmodifier robotstatuschecker.StatusChecker:False in conjunction with
+robot or rebot and verbose=False with the process_output function
 """
 
 import re
@@ -42,7 +49,8 @@ import sys
 from os.path import abspath
 
 from robot import __version__ as rf_version
-from robot.api import ExecutionResult, ResultVisitor
+from robot.api import ExecutionResult, ResultVisitor, logger
+from robot.output import LOGGER
 from robot.utils import Matcher
 
 __version__ = "2.2.1.dev1"
@@ -63,24 +71,54 @@ def process_output(inpath, outpath=None, verbose=True):
         int: Number of failed critical tests after post-processing.
     """
     if verbose:
-        print(f"Checking {abspath(inpath)}")
-    result = StatusChecker().process_output(inpath, outpath)
+        logger.console(f"Checking {abspath(inpath)}")
+    result = StatusChecker(verbose).process_output(inpath, outpath)
     if verbose and outpath:
-        print(f"Output: {abspath(outpath)}")
+        logger.console(f"Output: {abspath(outpath)}")
     return result.return_code
 
 
 class StatusChecker(ResultVisitor):
+
+    def __init__(self, verbose=True):
+        self.verbose = verbose
+        if str(self.verbose).lower() == 'false':
+            self.verbose = False
+        if self.verbose:
+            width = 78
+            suite_separator = '%s' % ('=' * width)
+            logger.console(suite_separator)
+            logger.console('************** Post-processing of results by status checker.... **************')
+            logger.console(suite_separator)
+
     def process_output(self, inpath, outpath=None):
         result = ExecutionResult(inpath)
         result.suite.visit(self)
         result.save(outpath)
         return result
 
+    def start_suite(self, suite):
+        if self.verbose:
+            LOGGER.start_suite(suite)
+
+    def end_suite(self, suite):
+        if self.verbose:
+            LOGGER.end_suite(suite)
+
     def visit_test(self, test):
-        expected = Expected(test.doc)
-        if TestStatusChecker(expected).check(test):
-            LogMessageChecker(expected).check(test)
+        if self.start_test(test) is not False:
+            expected = Expected(test.doc)
+            if TestStatusChecker(expected).check(test):
+                LogMessageChecker(expected).check(test)
+            self.end_test(test)
+
+    def start_test(self, test):
+        if self.verbose:
+            LOGGER.start_test(test)
+
+    def end_test(self, test):
+        if self.verbose:
+            LOGGER.end_test(test)
 
     def visit_keyword(self, kw):
         pass
@@ -345,8 +383,13 @@ if __name__ == "__main__":
     if "-h" in sys.argv or "--help" in sys.argv:
         print(__doc__)
         sys.exit(251)
+    args = sys.argv[1:]
     try:
-        rc = process_output(*sys.argv[1:])
+        if '--quiet' in args:
+            args.remove('--quiet')
+            rc = process_output(*args, verbose=False)
+        else:
+            rc = process_output(*args)
     except TypeError:
         print(__doc__)
         sys.exit(252)
