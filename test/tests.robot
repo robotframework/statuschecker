@@ -15,7 +15,8 @@ Explicit PASS with message
 Explicit SKIP with message
     [Documentation]   SKIP The message
     [Tags]    rf3unsupported
-    Status    SKIP    The message
+    Status    PASS    Test skipped as expected.\n\n
+    ...    Original message:\nThe message
     Skip    The message
 
 Expected FAIL
@@ -277,6 +278,12 @@ FAILURE: Unexpected PASS
     Status    FAIL    Test was expected to FAIL but it PASSED.
     No Operation
 
+FAILURE: Unexpected PASS for Expected SKIP
+    [Documentation]    SKIP Expected skip does not occur
+    [Tags]    rf3unsupported
+    Status    FAIL    Test was expected to SKIP but it PASSED.
+    No Operation
+
 FAILURE: Wrong PASS message
     Status    FAIL    Wrong message.\n\n
     ...    Expected:\n\n\n
@@ -288,6 +295,26 @@ FAILURE: Unexpected FAIL
     ...    Original message:\n
     ...    Unexpected error message
     Fail    Unexpected error message
+
+FAILURE: Unexpected FAIL for Expected SKIP
+    [Documentation]    SKIP
+    [Tags]    rf3unsupported
+    Status    FAIL    Test was expected to SKIP but it FAILED.\n\n
+    ...  Original message:\nSomething Bad Happened
+    Fail    Something Bad Happened
+
+FAILURE: Unexpected SKIP
+    [Tags]    rf3unsupported
+    Status    FAIL    Test was expected to PASS but it SKIPPED.\n\n
+    ...    Original message:\nSkipped with Skip keyword.
+    SKIP
+
+FAILURE: Unexpected SKIP for Expected FAIL
+    [Documentation]    FAIL
+    [Tags]    rf3unsupported
+    Status    FAIL    Test was expected to FAIL but it SKIPPED.\n\n
+    ...    Original message:\nSkipped with Skip keyword.
+    SKIP
 
 FAILURE: Wrong message
     [Documentation]    FAIL Expected failure

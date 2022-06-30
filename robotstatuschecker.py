@@ -211,15 +211,18 @@ class TestStatusChecker(BaseChecker):
 
     def _check_status(self, test):
         condition = test.status == self.status
-        message = f"Test was expected to {self.status} but it {test.status}ED."
+        message = "Test was expected to {} but it {}.".format(self.status,
+            "SKIPPED" if test.status == "SKIP" else test.status + "ED")
         return self._assert(condition, test, message)
 
     def _check_message(self, test):
         if not self._message_matches(test.message, self.message):
             message = f"Wrong message.\n\nExpected:\n{self.message}"
             return self._fail(test, message)
-        if test.status == "FAIL":
-            return self._pass(test, "Test failed as expected.")
+        if test.status != "PASS":
+            return self._pass(test, "Test {} as expected.".format(
+                "skipped" if test.status == "SKIP" else test.status.lower()+"ed"
+            ))
         return True
 
 
