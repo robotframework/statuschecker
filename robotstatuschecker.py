@@ -168,6 +168,11 @@ class BaseChecker:
             start = expected.replace("STARTS:", "", 1).strip()
             if actual.startswith(start):
                 return True
+        if expected.startswith("COUNT:"):
+            expected_count = int(expected.replace("COUNT:", "", 1).strip())
+            count = len(actual.splitlines())
+            if count == expected_count:
+                return True
         return False
 
     def _assert(self, condition, test, message, fail=True):
