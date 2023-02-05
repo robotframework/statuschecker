@@ -14,8 +14,6 @@ sys.path.insert(0, dirname(CURDIR))
 from robot.version import VERSION  # noqa
 
 from robotstatuschecker import process_output  # noqa
-from robotstatuschecker import RF3  # noqa
-
 
 def check_tests(robot_file):
     output = _run_tests_and_process_output(robot_file)
@@ -32,10 +30,7 @@ def _run_tests_and_process_output(robot_file):
     output = join(results, "output.xml")
     if exists(results):
         rmtree(results)
-    if RF3:
-        run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG", exclude="rf3unsupported")
-    else: 
-        run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG")
+    run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG")
     process_output(output)
     rebot(output, outputdir=results)
     return output
@@ -58,21 +53,11 @@ class StatusCheckerChecker(ResultVisitor):
             self.errors.append("%s:\n%s" % (test.name, "\n".join(errors)))
 
     def _get_expected(self, test):
-        if RF3:
-            return self._get_expected_rf3(test)
-        return self._get_expected_rf4(test)
-
-    def _get_expected_rf4(self, test):
         if len(test.setup.body) == 0:
             kw = test.body[0]
         else:
             kw = test.setup
         return (kw.body[1].messages[0].message, kw.body[2].messages[0].message)
-
-    def _get_expected_rf3(self, test):
-        kw = test.keywords[0]
-        assert kw.name == "Status", "No 'Status' keyword found."
-        return (kw.keywords[1].messages[0].message, kw.keywords[2].messages[0].message)
 
     def _verify(self, actual, expected, explanation):
         if actual == expected:
@@ -85,10 +70,7 @@ class StatusCheckerChecker(ResultVisitor):
             print("%d/%d test failed:" % (len(self.errors), self.tests))
             print("\n-------------------------------------\n".join(self.errors))
         else:
-            if RF3:
-                print("All %d tests passed/failed/logged as expected." % self.tests)
-            else: 
-                print("All %d tests passed/failed/logged/skipped as expected." % self.tests)
+            print("All %d tests passed/failed/logged/skipped as expected." % self.tests)
         print("Run on %s %s." % (python_implementation(), python_version()))
 
 

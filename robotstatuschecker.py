@@ -41,12 +41,10 @@ import re
 import sys
 from os.path import abspath
 
-from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
-__version__ = "2.2.1.dev1"
-RF3 = rf_version.startswith("3")
+__version__ = "3.0.0.dev1"
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -93,16 +91,11 @@ class Expected:
         self.logs = self._get_logs(doc)
 
     def _get_status(self, doc):
-        if RF3:
-            return "FAIL" if "FAIL" in doc else "PASS"
         if "FAIL" not in doc:
             return "SKIP" if "SKIP" in doc else "PASS"
         return "FAIL"
 
     def _get_message(self, doc):
-        if RF3:
-            if "FAIL" not in doc and "PASS" not in doc:
-                return ""
         if all(status not in doc for status in ["FAIL", "SKIP", "PASS"]):
             return ""
         status = self._get_status(doc)
@@ -243,46 +236,23 @@ class LogMessageChecker(BaseChecker):
         kw = None
         try:
             for index in expected.kw_index:
-                kw = self._get_keyword_rf3_rf4(test, expected, kw, index)
-                if kw is None:
-                    return kw
+                if expected.test_setup and not test.setup:
+                    self._fail(test, self._no_setup_message.format(test.name))
+                    return None
+                if expected.test_teardown and not test.teardown:
+                    self._fail(test, self._no_teardown_message.format(test.name))
+                    return None
+                if expected.test_setup and not kw:
+                    kw = test.setup
+                elif expected.test_teardown and not kw:
+                    kw = test.teardown
+                else:
+                    kw = (kw or test).body[index]
             return kw
         except IndexError:
             message = f"No keyword with index '{expected.kw_index_str}'."
             self._fail(test, message)
             return None
-
-    def _get_keyword_rf3_rf4(self, test, expected, kw, index):
-        if RF3:
-            return self._get_keyword_rf3(test, expected, kw, index)
-        return self._get_keyword_rf4(test, expected, kw, index)
-
-    def _get_keyword_rf3(self, test, expected, kw, index):
-        if expected.test_setup and not test.keywords.setup:
-            self._fail(test, self._no_setup_message.format(test.name))
-            return None
-        if expected.test_teardown and not test.keywords.teardown:
-            self._fail(test, self._no_teardown_message.format(test.name))
-            return None
-        if test.keywords.setup and not expected.test_setup and not expected.visited_setup:
-            index += 1
-            expected.visited_setup = True
-        return (kw or test).keywords[index]
-
-    def _get_keyword_rf4(self, test, expected, kw, index):
-        if expected.test_setup and not test.setup:
-            self._fail(test, self._no_setup_message.format(test.name))
-            return None
-        if expected.test_teardown and not test.teardown:
-            self._fail(test, self._no_teardown_message.format(test.name))
-            return None
-        if expected.test_setup and not kw:
-            kw = test.setup
-        elif expected.test_teardown and not kw:
-            kw = test.teardown
-        else:
-            kw = (kw or test).body[index]
-        return kw
 
     def _check_message_by_index(self, test, kw, expected):
         try:
