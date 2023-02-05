@@ -2,6 +2,7 @@
 Suite Setup         Log    Suite setup
 Suite Teardown      Log    Suite teardown
 
+
 *** Test Cases ***
 Implicit PASS
     Status    PASS
@@ -13,7 +14,7 @@ Explicit PASS with message
     Pass Execution    The message
 
 Explicit SKIP with message
-    [Documentation]   SKIP The message
+    [Documentation]    SKIP The message
     [Tags]    rf3unsupported
     Status    SKIP    The message
     Skip    The message
@@ -329,6 +330,7 @@ FAILURE: Non-existing log message
 FAILURE: Non-existing log message wildcard
     [Documentation]    LOG 1:* Bogus message
     Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with level INFO and message 'Bogus message'.
+
 
 *** Keywords ***
 Logging User Keyword
