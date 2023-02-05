@@ -216,3 +216,7 @@ is possible to use ``NONE`` in the place of the message.
         [Documentation]    LOG 1:1      Test that we have only 1 msg
         ...                LOG 1:2      NONE
         Steps
+
+    Count Messages
+        [Documentation]    LOG 4 COUNT: 2    # Fourth keyword should have excatly 2 messages.
+        Steps
