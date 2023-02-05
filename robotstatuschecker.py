@@ -224,11 +224,10 @@ class TestStatusChecker(BaseChecker):
 
 
 class LogMessageChecker(BaseChecker):
-
     _no_setup_message = "Expected test {} to have setup but setup is not present."
     _no_teardown_message = "Expected test {} to have teardown but teardown is not present."
     _teardown_access_message = (
-        "In test '{}' keyword is in teardown but " "was expected to ne in test body index {}"
+        "In test '{}' keyword is in teardown but was expected to ne in test body index {}"
     )
 
     def __init__(self, expected):
