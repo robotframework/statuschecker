@@ -266,6 +266,16 @@ Expected PASS and log messages
     Log    Any time now...
     Pass Execution    Told ya!!
 
+Expected PASS and log messages with COUNT
+    [Documentation]
+    ...    PASS Told ya!!
+    ...    LOG 4 COUNT: 2
+    ...    LOG 4:2 NONE
+    Status    PASS    Told ya!!
+    Log    Passing soon!
+    Log    Any time now...
+    Pass Execution    Told ya!!
+
 Expected PASS and teadown does not affect
     [Documentation]    This text is ignored.
     ...    LOG 2 Passing soon!
