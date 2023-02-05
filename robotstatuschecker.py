@@ -44,7 +44,7 @@ from os.path import abspath
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
-__version__ = "3.0.0.dev1"
+__version__ = "3.0.0"
 
 
 def process_output(inpath, outpath=None, verbose=True):
