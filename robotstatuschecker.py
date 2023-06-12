@@ -40,8 +40,8 @@ If an output file is not given, the input file is edited in place.
 import re
 import sys
 from os.path import abspath
-from packaging.version import Version
 
+from packaging.version import Version
 from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
