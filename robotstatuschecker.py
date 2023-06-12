@@ -41,13 +41,12 @@ import re
 import sys
 from os.path import abspath
 
-from packaging.version import Version
 from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 __version__ = "3.0.0"
-RF_61 = Version(rf_version) >= Version("6.1")
+RF_61 = tuple(rf_version.split(".")[:2]) >= ("6", "1")
 
 
 def process_output(inpath, outpath=None, verbose=True):
