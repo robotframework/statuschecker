@@ -45,7 +45,7 @@ from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
-__version__ = "3.0.0"
+__version__ = "3.0.1"
 RF_61 = tuple(rf_version.split(".")[:2]) >= ("6", "1")
 
 
