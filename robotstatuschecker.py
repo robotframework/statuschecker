@@ -40,11 +40,14 @@ If an output file is not given, the input file is edited in place.
 import re
 import sys
 from os.path import abspath
+from packaging.version import Version
 
+from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
 from robot.utils import Matcher
 
 __version__ = "3.0.0"
+RF_61 = Version(rf_version) >= Version("6.1")
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -108,6 +111,12 @@ class Expected:
 class ExpectedLog:
     def __init__(self, doc):
         index, message = doc.strip().split(" ", 1)
+        # Prior RF 6.1 when doc had: LOG 1:1    KALA
+        # doc was returned by RF in form LOG 1:1 KALA
+        # By a single space, but with RF 6.2 doc is returned as is.
+        # To keep backwards compatability, left strip message.
+        if RF_61:
+            message = message.lstrip(" ")
         test_setup, kw_index, msg_index, test_teardown = self._split_index(index)
         self.test_setup = test_setup
         self.kw_index = kw_index
