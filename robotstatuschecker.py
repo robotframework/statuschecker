@@ -39,7 +39,7 @@ If an output file is not given, the input file is edited in place.
 
 import re
 import sys
-from os.path import abspath
+from pathlib import Path
 
 from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
@@ -47,6 +47,7 @@ from robot.utils import Matcher
 
 __version__ = "3.0.1"
 RF_61 = tuple(rf_version.split(".")[:2]) >= ("6", "1")
+RF_7 = tuple(rf_version.split(".")[:2]) >= ("7", "0")
 
 
 def process_output(inpath, outpath=None, verbose=True):
@@ -63,10 +64,10 @@ def process_output(inpath, outpath=None, verbose=True):
         int: Number of failed critical tests after post-processing.
     """
     if verbose:
-        print(f"Checking {abspath(inpath)}")
+        print(f"Checking {Path(inpath).resolve()}")
     result = StatusChecker().process_output(inpath, outpath)
     if verbose and outpath:
-        print(f"Output: {abspath(outpath)}")
+        print(f"Output: {Path(outpath).resolve()}")
     return result.return_code
 
 
@@ -271,9 +272,10 @@ class LogMessageChecker(BaseChecker):
         try:
             msg = kw.messages[expected.msg_index]
         except IndexError:
+            kw_name = self._get_kw_name(kw)
             condition = expected.message == "NONE"
             message = (
-                f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not "
+                f"Keyword '{kw_name}' (index {expected.kw_index_str}) does not "
                 f"have message {expected.msg_index_str}."
             )
             self._assert(condition, test, message)
@@ -304,10 +306,14 @@ class LogMessageChecker(BaseChecker):
         else:
             self._check_message_by_wildcard(test, kw, expected)
 
+    def _get_kw_name(self, kw):
+        return kw.full_name if RF_7 else kw.name
+
     def _check_msg_level(self, test, kw, msg, expected, fail=True):
         condition = msg.level == expected.level if expected.level != "ANY" else True
+        kw_name = self._get_kw_name(kw)
         message = (
-            f"Keyword '{kw.name}' (index {expected.kw_index_str}) "
+            f"Keyword '{kw_name}' (index {expected.kw_index_str}) "
             f"message {expected.msg_index_str} has wrong level."
             f"\n\nExpected: {expected.level}\nActual: {msg.level}"
         )
@@ -315,8 +321,9 @@ class LogMessageChecker(BaseChecker):
 
     def _check_msg_message(self, test, kw, msg, expected, fail=True):
         condition = self._message_matches(msg.message.strip(), expected.message)
+        kw_name = self._get_kw_name(kw)
         message = (
-            f"Keyword '{kw.name}' (index {expected.kw_index_str}) "
+            f"Keyword '{kw_name}' (index {expected.kw_index_str}) "
             f"message {expected.msg_index_str} has wrong content."
             f"\n\nExpected:\n{expected.message}\n\nActual:\n{msg.message}"
         )
