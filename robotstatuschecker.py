@@ -43,6 +43,7 @@ from pathlib import Path
 
 from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
+from robot.result import Keyword
 from robot.utils import Matcher
 
 __version__ = "3.0.1"
@@ -248,6 +249,7 @@ class LogMessageChecker(BaseChecker):
 
     def _get_keyword(self, test, expected):
         kw = None
+        test_body = [kw for kw in test.body if isinstance(kw, Keyword)]
         try:
             for index in expected.kw_index:
                 if expected.test_setup and not test.setup:
@@ -261,7 +263,7 @@ class LogMessageChecker(BaseChecker):
                 elif expected.test_teardown and not kw:
                     kw = test.teardown
                 else:
-                    kw = (kw or test).body[index]
+                    kw = kw.body[index] if kw else test_body[index]
             return kw
         except IndexError:
             message = f"No keyword with index '{expected.kw_index_str}'."

@@ -1,4 +1,6 @@
 *** Settings ***
+Library             MyLib.py
+
 Suite Setup         Log    Suite setup
 Suite Teardown      Log    Suite teardown
 
@@ -340,6 +342,11 @@ FAILURE: Non-existing log message
 FAILURE: Non-existing log message wildcard
     [Documentation]    LOG 1:* Bogus message
     Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with level INFO and message 'Bogus message'.
+
+Keywod with listener
+    [Documentation]    LOG 2 Adding 1 and 2
+    Status    PASS
+    Add    1    2
 
 
 *** Keywords ***
