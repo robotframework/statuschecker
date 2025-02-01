@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-#  Copyright 2008-2016 Nokia Networks
+# Copyright 2008-2015 Nokia Networks
+# Copyright 2016-     Robot Framework Foundation
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Robot Framework test status checker
+"""Robot Framework status checker.
 
 This tool processes Robot Framework output XML files and checks that test case
 statuses and messages are as expected. Main use case is post-processing output
@@ -39,129 +40,125 @@ If an output file is not given, the input file is edited in place.
 
 import re
 import sys
+from os.path import abspath, normpath
 from pathlib import Path
 
-from robot import __version__ as rf_version
 from robot.api import ExecutionResult, ResultVisitor
+from robot.model import BodyItem
+from robot.result import Keyword, Message, Result, TestCase
 from robot.utils import Matcher
 
-__version__ = "3.0.1"
-RF_61 = tuple(rf_version.split(".")[:2]) >= ("6", "1")
-RF_7 = tuple(rf_version.split(".")[:2]) >= ("7", "0")
+
+__version__ = "4.0.0.dev1"
 
 
-def process_output(inpath, outpath=None, verbose=True):
+def process_output(in_path: 'str|Path',
+                   out_path: 'str|Path|None' = None,
+                   verbose: bool = True) -> int:
     """The main programmatic entry point to status checker.
 
     Args:
-        inpath (str): Path to Robot Framework XML output file to process.
-        outpath (str): Path where to write processed output. If not given,
-            ``inpath`` is edited in place.
-        verbose (bool): When ``True`` (default), prints both ``inpath`` and
-            ``outpath`` to console.
+        in_path: Path to Robot Framework XML output file to process.
+        out_path: Path where to write processed output. If not given,
+            `in_path` is edited in place.
+        verbose: When `True` (default), prints both `in_path` and
+            `out_path` to console.
 
     Returns:
-        int: Number of failed critical tests after post-processing.
+        Number of failed tests after post-processing.
     """
+    # Use os.path functions because pathlib has no way to normalize paths
+    # without also resolving symlinks.
+    in_path = abspath(normpath(in_path))
+    out_path = abspath(normpath(out_path)) if out_path else None
     if verbose:
-        print(f"Checking {Path(inpath).resolve()}")
-    result = StatusChecker().process_output(inpath, outpath)
-    if verbose and outpath:
-        print(f"Output: {Path(outpath).resolve()}")
+        print(f"Checking {in_path}")
+    result = StatusChecker().check(in_path, out_path)
+    if verbose and out_path:
+        print(f"Output: {out_path}")
     return result.return_code
 
 
 class StatusChecker(ResultVisitor):
-    def process_output(self, inpath, outpath=None):
-        result = ExecutionResult(inpath)
+
+    def check(self, in_path: str, out_path: 'str|None' = None) -> Result:
+        result = ExecutionResult(in_path)
         result.suite.visit(self)
-        result.save(outpath)
+        result.save(out_path)
         return result
 
-    def visit_test(self, test):
+    def visit_test(self, test: TestCase):
         expected = Expected(test.doc)
-        if TestStatusChecker(expected).check(test):
-            LogMessageChecker(expected).check(test)
+        if StatusAndMessageChecker(expected).check(test):
+            if LogMessageChecker(expected).check(test):
+                self._mark_checked(test)
 
-    def visit_keyword(self, kw):
+    def _mark_checked(self, test: TestCase):
+        message = 'Test status has been checked.'
+        if test.status != 'PASS':
+            message += f'\n\nOriginal status: {test.status}'
+        if test.message:
+            message += f'\n\nOriginal message:\n{test.message}'
+        test.status = 'PASS'
+        test.message = message
+
+    def visit_keyword(self, kw: Keyword):
         pass
 
 
 class Expected:
-    def __init__(self, doc):
+
+    def __init__(self, doc: str):
         self.status = self._get_status(doc)
         self.message = self._get_message(doc)
         self.logs = self._get_logs(doc)
 
-    def _get_status(self, doc):
-        if "FAIL" not in doc:
-            return "SKIP" if "SKIP" in doc else "PASS"
-        return "FAIL"
+    def _get_status(self, doc: str) -> str:
+        if "FAIL" in doc:
+            return "FAIL"
+        if "SKIP" in doc:
+            return "SKIP"
+        return "PASS"
 
-    def _get_message(self, doc):
-        if all(status not in doc for status in ["FAIL", "SKIP", "PASS"]):
-            return ""
-        status = self._get_status(doc)
-        return doc.split(status, 1)[1].split("LOG", 1)[0].strip()
+    def _get_message(self, doc: str) -> str:
+        for status in ["FAIL", "SKIP", "PASS"]:
+            if status in doc:
+                return doc.split(status, 1)[1].split("LOG", 1)[0].strip()
+        return ""
 
-    def _get_logs(self, doc):
+    def _get_logs(self, doc: str) -> 'list[ExpectedLog]':
         return [ExpectedLog(item) for item in doc.split("LOG")[1:]]
 
 
 class ExpectedLog:
-    def __init__(self, doc):
-        index, message = doc.strip().split(" ", 1)
-        # Prior RF 6.1 when doc had: LOG 1:1    KALA
-        # doc was returned by RF in form LOG 1:1 KALA
-        # By a single space, but with RF 6.2 doc is returned as is.
-        # To keep backwards compatability, left strip message.
-        if RF_61:
-            message = message.lstrip(" ")
-        test_setup, kw_index, msg_index, test_teardown = self._split_index(index)
-        self.test_setup = test_setup
-        self.kw_index = kw_index
-        self.msg_index = msg_index
-        self.test_teardown = test_teardown
+
+    def __init__(self, doc: str):
+        try:
+            locator, message = doc.strip().split(maxsplit=1)
+        except ValueError:
+            locator, message = doc.strip(), ''
+        self.locator_str = locator
+        # ':' is legacy message separator. It was softly deprecated in v4.0.
+        self.locator = [self._parse_locator_part(part)
+                        for part in locator.replace(':', '.').split('.')]
         self.level, self.message = self._split_level(message)
-        self.visited_setup = False
 
-    @property
-    def kw_index_str(self):
-        return ".".join(str(index + 1) for index in self.kw_index)
+    def _parse_locator_part(self, part: str) -> 'int|str':
+        try:
+            return int(part)
+        except ValueError:
+            return part.lower()
 
-    @property
-    def msg_index_str(self):
-        return str(self.msg_index + 1) if isinstance(self.msg_index, int) else self.msg_index
-
-    def _split_index(self, index):
-        if ":" in index:
-            kw_index, msg_index = index.split(":")
-        else:
-            kw_index, msg_index = index, 1
-        new_kw_index = []
-        test_setup = False
-        test_teardown = False
-        for index in kw_index.split("."):
-            if index.upper() == "SETUP":
-                test_setup = True
-                new_kw_index.append(0)
-            elif index.upper() == "TEARDOWN":
-                test_teardown = True
-                new_kw_index.append(-1)
-            else:
-                new_kw_index.append(int(index) - 1)
-        msg_index = "*" if msg_index == "*" else int(msg_index) - 1
-        return test_setup, new_kw_index, msg_index, test_teardown
-
-    def _split_level(self, message):
+    def _split_level(self, message: str) -> 'tuple[str, str]':
         for level in ["TRACE", "DEBUG", "INFO", "WARN", "FAIL", "ERROR", "ANY"]:
             if message.startswith(level):
-                return level, message[len(level) :].strip()
+                return level, message[len(level):].strip()
         return "INFO", message
 
 
 class BaseChecker:
-    def _message_matches(self, actual, expected):
+
+    def _message_matches(self, actual: str, expected: str) -> bool:
         if actual == expected:
             return True
         if expected.startswith("REGEXP:"):
@@ -184,159 +181,160 @@ class BaseChecker:
                 return True
         return False
 
-    def _assert(self, condition, test, message, fail=True):
-        if not condition:
-            return self._fail(test, message) if fail else False
-        return True
-
-    def _fail(self, test, message):
+    def _fail(self, test: TestCase, message: str):
         test.status = "FAIL"
-        self._set_message(test, message)
-        return False
-
-    def _pass(self, test, message):
-        test.status = "PASS"
-        self._set_message(test, message)
-        return True
-
-    def _set_message(self, test, message):
         if test.message:
-            original = f"\n\nOriginal message:\n{test.message}"
+            test.message = f"{message}\n\nOriginal message:\n{test.message}"
         else:
-            original = ""
-        test.message = message + original
+            test.message = message
 
 
-class TestStatusChecker(BaseChecker):
-    def __init__(self, expected):
+class StatusAndMessageChecker(BaseChecker):
+
+    def __init__(self, expected: Expected):
         self.status = expected.status
         self.message = expected.message
 
-    def check(self, test):
-        if self._check_status(test):
-            return self._check_message(test)
-
-    def _check_status(self, test):
-        condition = test.status == self.status
-        message = f"Test was expected to {self.status} but it {test.status}ED."
-        return self._assert(condition, test, message)
-
-    def _check_message(self, test):
+    def check(self, test: TestCase) -> bool:
+        if test.status != self.status:
+            self._fail(test, f"Expected status {self.status}, got {test.status}.")
+            return False
         if not self._message_matches(test.message, self.message):
-            message = f"Wrong message.\n\nExpected:\n{self.message}"
-            return self._fail(test, message)
-        if test.status == "FAIL":
-            return self._pass(test, "Test failed as expected.")
+            self._fail(test, f"Wrong message.\n\nExpected:\n{self.message}")
+            return False
         return True
 
 
 class LogMessageChecker(BaseChecker):
-    _no_setup_message = "Expected test {} to have setup but setup is not present."
-    _no_teardown_message = "Expected test {} to have teardown but teardown is not present."
-    _teardown_access_message = (
-        "In test '{}' keyword is in teardown but was expected to ne in test body index {}"
-    )
 
-    def __init__(self, expected):
+    def __init__(self, expected: Expected):
         self.logs = expected.logs
 
-    def check(self, test):
+    def check(self, test: TestCase):
         for expected in self.logs:
-            kw = self._get_keyword(test, expected)
-            if kw:
-                self._check_message(test, kw, expected)
+            try:
+                self._check(test, expected)
+            except CheckOk:
+                pass
+            except (InvalidUsage, NotFound, AssertionError) as err:
+                self._fail(test, str(err))
+                return False
+        return True
 
-    def _get_keyword(self, test, expected):
-        kw = None
+    def _check(self, test: TestCase, expected: ExpectedLog):
+        item = test
+        for level, part in enumerate(expected.locator):
+            if isinstance(item, Message):
+                locator = '.'.join(str(part) for part in expected.locator[:level])
+                raise NotFound(f"Locator '{locator}' matches message and "
+                               f"it cannot have child '{part}'.")
+            if part == '*':
+                return self._check_message_by_wildcard(item, expected, level)
+            elif isinstance(part, int):
+                item = self._get_item_by_index(item, part, expected, level)
+            else:
+                item = self._get_item_by_attribute(item, part, expected, level)
+        if not isinstance(item, Message):
+            item = self._get_item_by_index(item, 1, expected, require_message=True)
+        assert isinstance(item, Message)
+        self._check_message(item, expected)
+
+    def _get_item_by_index(self, parent: 'TestCase|BodyItem',
+                           index: int,
+                           expected: ExpectedLog,
+                           level: 'int|None' = None,
+                           require_message: bool = False) -> 'BodyItem':
+        prefix = self._get_error_prefix(parent, expected.locator[:level])
         try:
-            for index in expected.kw_index:
-                if expected.test_setup and not test.setup:
-                    self._fail(test, self._no_setup_message.format(test.name))
-                    return None
-                if expected.test_teardown and not test.teardown:
-                    self._fail(test, self._no_teardown_message.format(test.name))
-                    return None
-                if expected.test_setup and not kw:
-                    kw = test.setup
-                elif expected.test_teardown and not kw:
-                    kw = test.teardown
-                else:
-                    kw = (kw or test).body[index]
-            return kw
+            item = parent.body[index - 1]
+            if item.type == item.MESSAGE or not require_message:
+                return item
+            raise NotFound(f"{prefix} does not have message in index {index}.")
         except IndexError:
-            message = f"No keyword with index '{expected.kw_index_str}'."
-            self._fail(test, message)
-            return None
+            if (expected.message == "NONE"
+                    and (level is None or len(expected.locator) == level + 1)):
+                raise CheckOk
+            raise NotFound(f"{prefix} does not have child in index {index}.")
 
-    def _check_message_by_index(self, test, kw, expected):
-        try:
-            msg = kw.messages[expected.msg_index]
-        except IndexError:
-            kw_name = self._get_kw_name(kw)
-            condition = expected.message == "NONE"
-            message = (
-                f"Keyword '{kw_name}' (index {expected.kw_index_str}) does not "
-                f"have message {expected.msg_index_str}."
-            )
-            self._assert(condition, test, message)
-        else:
-            if self._check_msg_level(test, kw, msg, expected):
-                self._check_msg_message(test, kw, msg, expected)
+    def _get_item_by_attribute(self, parent: 'TestCase|BodyItem',
+                               attribute: str,
+                               expected: ExpectedLog,
+                               level: int) -> 'BodyItem':
+        item = getattr(parent, attribute, None)
+        if item:
+            return item
+        prefix = self._get_error_prefix(parent, expected.locator[:level])
+        raise NotFound(f"{prefix} does not have '{attribute}'.")
 
-    def _check_message_by_wildcard(self, test, kw, expected):
+    def _get_error_prefix(self, parent: 'TestCase|BodyItem',
+                          locator: 'list[str|int]') -> str:
+        typ = getattr(parent, 'type', 'TEST')    # `TestCase.type` is new in RF 7.2.
+        prefix = f"{typ.title()} '{self._get_name(parent)}'"
+        if locator:
+            locator = '.'.join(str(part) for part in locator)
+            prefix += f" (locator '{locator}')"
+        return prefix
+
+    def _get_name(self, item: 'TestCase|BodyItem') -> str:
+        if isinstance(item, TestCase):
+            return item.name
+        if isinstance(item, Keyword):
+            # `full_name` is new in RF 7.0. With older `name` returns the full name.
+            return getattr(item, "full_name", item.name)
+        return item.type
+
+    def _check_message_by_wildcard(self, parent: 'TestCase|Message',
+                                   expected: ExpectedLog,
+                                   level: int):
+        if len(expected.locator) != level + 1:
+            raise InvalidUsage(f"Message index wildcard '*' can be used only as "
+                               f"the last locator item, got '{expected.locator_str}.")
         if expected.message == "NONE":
-            message = "Message index wildcard '*' is not supported with expected message 'NONE'."
-            self._fail(test, message)
-            return
+            raise InvalidUsage("Message index wildcard '*' cannot be used with "
+                               "'NONE' message.")
+        for item in parent.body:
+            if (isinstance(item, Message)
+                    and self._message_matches(item.message.strip(), expected.message)
+                    and self._level_matches(item.level, expected.level)):
+                return
+        prefix = self._get_error_prefix(parent, expected.locator[:level])
+        raise AssertionError(f"{prefix} has no message matching '{expected.message}' "
+                             f"with level {expected.level}.")
 
-        for msg in kw.messages:
-            if self._check_msg_message(test, kw, msg, expected, fail=False):
-                if self._check_msg_level(test, kw, msg, expected, fail=False):
-                    break
-        else:
-            message = (
-                f"Keyword '{kw.name}' (index {expected.kw_index_str}) does not contain any logs "
-                f"with level {expected.level} and message '{expected.message}'."
-            )
-            self._fail(test, message)
+    def _level_matches(self, actual: str, expected: str) -> bool:
+        return actual == expected or expected == "ANY"
 
-    def _check_message(self, test, kw, expected):
-        if expected.msg_index != "*":
-            self._check_message_by_index(test, kw, expected)
-        else:
-            self._check_message_by_wildcard(test, kw, expected)
+    def _check_message(self, message: Message, expected: ExpectedLog):
+        name = self._get_name(message.parent)
+        locator = expected.locator_str
+        if not self._message_matches(message.message.strip(), expected.message):
+            raise AssertionError(f"Keyword '{name}' has wrong message "
+                                 f"(locator '{locator}').\n\n"
+                                 f"Expected:\n{expected.message}\n\n"
+                                 f"Actual:\n{message.message}")
+        if not self._level_matches(message.level, expected.level):
+            raise AssertionError(f"Keyword '{name}' has message with wrong level "
+                                 f"(locator '{locator}').\n\n"
+                                 f"Expected: {expected.level}\n"
+                                 f"Actual:   {message.level}")
 
-    def _get_kw_name(self, kw):
-        return kw.full_name if RF_7 else kw.name
 
-    def _check_msg_level(self, test, kw, msg, expected, fail=True):
-        condition = msg.level == expected.level if expected.level != "ANY" else True
-        kw_name = self._get_kw_name(kw)
-        message = (
-            f"Keyword '{kw_name}' (index {expected.kw_index_str}) "
-            f"message {expected.msg_index_str} has wrong level."
-            f"\n\nExpected: {expected.level}\nActual: {msg.level}"
-        )
-        return self._assert(condition, test, message, fail)
+class InvalidUsage(Exception):
+    pass
 
-    def _check_msg_message(self, test, kw, msg, expected, fail=True):
-        condition = self._message_matches(msg.message.strip(), expected.message)
-        kw_name = self._get_kw_name(kw)
-        message = (
-            f"Keyword '{kw_name}' (index {expected.kw_index_str}) "
-            f"message {expected.msg_index_str} has wrong content."
-            f"\n\nExpected:\n{expected.message}\n\nActual:\n{msg.message}"
-        )
-        return self._assert(condition, test, message, fail)
+
+class NotFound(Exception):
+    pass
+
+
+class CheckOk(Exception):
+    pass
 
 
 if __name__ == "__main__":
-    if "-h" in sys.argv or "--help" in sys.argv:
+    args = sys.argv[1:]
+    if "-h" in args or "--help" in args or len(args) not in (1, 2):
         print(__doc__)
         sys.exit(251)
-    try:
-        rc = process_output(*sys.argv[1:])
-    except TypeError:
-        print(__doc__)
-        sys.exit(252)
+    rc = process_output(*args)
     sys.exit(rc)

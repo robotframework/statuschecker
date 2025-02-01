@@ -21,7 +21,6 @@ def check_tests(robot_file):
     checker = StatusCheckerChecker()
     result.suite.visit(checker)
     checker.print_status()
-    print(f"Robot Framework version: {VERSION}")
     sys.exit(len(checker.errors))
 
 
@@ -43,35 +42,45 @@ class StatusCheckerChecker(ResultVisitor):
 
     def visit_test(self, test):
         self.tests += 1
+        try:
+            self._verify(test)
+        except AssertionError as err:
+            self.errors.append(str(err))
+
+    def _verify(self, test):
         status, message = self._get_expected(test)
-        errors = [
-            self._verify(test.status, status, "status"),
-            self._verify(test.message, message, "message"),
-        ]
-        errors = ["- %s" % e for e in errors if e]
-        if errors:
-            self.errors.append("%s:\n%s" % (test.name, "\n".join(errors)))
+        if test.status != status:
+            raise AssertionError(f"Test '{test.name}' had wrong status.\n"
+                                 f"{'- ' * 39}\n"
+                                 f"Expected: {status}\n"
+                                 f"Message:\n{message}\n"
+                                 f"{'- ' * 39}\n"
+                                 f"Actual: {test.status}\n"
+                                 f"Message:\n{test.message}")
+        if test.message != message:
+            raise AssertionError(f"Test '{test.name}' had wrong message.\n"
+                                 f"{'- ' * 39}\n"
+                                 f"Expected:\n{message}\n"
+                                 f"{'- ' * 39}\n"
+                                 f"Actual:\n{test.message}")
 
     def _get_expected(self, test):
-        if len(test.setup.body) == 0:
-            kw = test.body[0]
-        else:
-            kw = test.setup
+        kw = test.setup or test.body[0]
+        assert kw.name == 'Status', 'Status keyword missing!'
         return (kw.body[1].messages[0].message, kw.body[2].messages[0].message)
-
-    def _verify(self, actual, expected, explanation):
-        if actual == expected:
-            return ""
-        return 'Expected %s to be "%s" but it was "%s".' % (explanation, expected, actual)
 
     def print_status(self):
         print()
         if self.errors:
-            print("%d/%d test failed:" % (len(self.errors), self.tests))
-            print("\n-------------------------------------\n".join(self.errors))
+            print(f"{len(self.errors)}/{self.tests} test failed!")
+            print("=" * 78)
+            for error in self.errors:
+                print(error)
+                print("-" * 78)
         else:
-            print("All %d tests passed/failed/logged/skipped as expected." % self.tests)
-        print("Run on %s %s." % (python_implementation(), python_version()))
+            print(f"All {self.tests} tests passed/failed/logged/skipped as expected.")
+            print("-" * 78)
+        print(f"Robot Framework {VERSION} on {python_implementation()} {python_version()}.")
 
 
 if __name__ == "__main__":

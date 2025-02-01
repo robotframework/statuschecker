@@ -1,7 +1,9 @@
 *** Settings ***
-Suite Setup         Log    Suite setup
-Suite Teardown      Log    Suite teardown
+Suite Setup       Log    Suite setup
+Suite Teardown    Log    Suite teardown
 
+*** Variables ***
+${CHECKED}        Test status has been checked.
 
 *** Test Cases ***
 Implicit PASS
@@ -10,61 +12,114 @@ Implicit PASS
 
 Explicit PASS with message
     [Documentation]    PASS The message
-    Status    PASS    The message
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original message:\nThe message
     Pass Execution    The message
 
-Explicit SKIP with message
+Expect PASS got FAIL
+    Status    FAIL
+    ...    Expected status PASS, got FAIL.\n\n
+    ...    Original message:\nOoops!
+    Fail    Ooops!
+
+Expect PASS got SKIP
+    Status    FAIL
+    ...    Expected status PASS, got SKIP.\n\n
+    ...    Original message:\nOoops!
+    Skip    Ooops!
+
+PASS with wrong message
+    [Documentation]    PASS The message
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nThe message
+
+SKIP
     [Documentation]    SKIP The message
-    [Tags]    rf3unsupported
-    Status    SKIP    The message
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: SKIP\n\n
+    ...    Original message:\nThe message
     Skip    The message
 
-Expected FAIL
-    [Documentation]    FAIL Expected failure
-    Status    PASS    Test failed as expected.\n\n
+Expect SKIP got PASS
+    [Documentation]    SKIP This won't happen!
+    Status    FAIL    Expected status SKIP, got PASS.
+
+Expect SKIP got FAIL
+    [Documentation]    SKIP This won't happen!
+    Status    FAIL
+    ...    Expected status SKIP, got FAIL.\n\n
+    ...    Original message:\nThis happens!
+    Fail    This happens!
+
+SKIP with wrong message
+    [Documentation]    SKIP The message
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nThe message\n\n
+    ...    Original message:\nxxx
+    Skip    xxx
+
+FAIL
+    [Documentation]    Text before the marker is ignored. FAIL Expected failure
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
     ...    Original message:\nExpected failure
     Fail    Expected failure
 
-SKIP Plus FAIL Expected FAIL
-    [Documentation]    SKIP FAIL Expected failure
-    [Tags]    rf3unsupported
-    Status    PASS    Test failed as expected.\n\n
-    ...    Original message:\nExpected failure
-    Fail    Expected failure
+Expect FAIL got PASS
+    [Documentation]    FAIL This won't happen!
+    Status    FAIL    Expected status FAIL, got PASS.
 
-FAIL Plus SKIP Expected FAIL
-    [Documentation]    FAIL Expected failure SKIP
-    [Tags]    rf3unsupported
-    Status    PASS    Test failed as expected.\n\n
-    ...    Original message:\nExpected failure SKIP
-    Fail    Expected failure SKIP
+Expect FAIL got SKIP
+    [Documentation]    FAIL This won't happen!
+    Status    FAIL
+    ...    Expected status FAIL, got SKIP.\n\n
+    ...    Original message:\nThis happens!
+    Skip    This happens!
 
-Ignore documentation before marker
-    [Documentation]    This text is ignored. FAIL Expected failure
-    Status    PASS    Test failed as expected.\n\n
-    ...    Original message:\nExpected failure
-    Fail    Expected failure
-
-Expected FAIL with REGEXP
+FAIL with REGEXP
     [Documentation]    FAIL REGEXP: Pattern is here.* \\d+
-    Status    PASS    Test failed as expected.\n\n
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
     ...    Original message:\nPattern is here\nmultiline 123
     Fail    Pattern is here\nmultiline 123
 
-Expected FAIL with GLOB
+FAIL with GLOB
     [Documentation]    FAIL GLOB: Globs ??? way *wl\neven *!?!
-    Status    PASS    Test failed as expected.\n\n
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
     ...    Original message:\nGlobs are way kewl\neven in multile lines\n!!!
     Fail    Globs are way kewl\neven in multile lines\n!!!
 
-Expected FAIL with STARTS
+FAIL with STARTS
     [Documentation]    FAIL STARTS: This is start
-    Status    PASS    Test failed as expected.\n\n
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
     ...    Original message:\nThis is start and this is end
     Fail    This is start and this is end
 
-Log message
+FAIL with wrong message
+    [Documentation]    FAIL Wrong
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nWrong\n\n
+    ...    Original message:\nMessage
+    Fail    Message
+
+Log matching keyword
     [Documentation]    LOG 2 Hello world!
+    Status    PASS
+    Log    Hello world!
+
+Log matching message
+    [Documentation]    LOG 2.1 Hello world!
     Status    PASS
     Log    Hello world!
 
@@ -155,9 +210,13 @@ Log messages deeper with wildcard and setup
     Run Keyword And Ignore Error
     ...    Fail    My Error Here
 
+Invalid wildcard usage
+    [Documentation]    LOG 1.*.2 Ooops
+    Status    FAIL    Message index wildcard '*' can be used only as the last locator item, got '1.*.2.
+
 Log message with REGEXP
     [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
-    ...    LOG 3 REGEXP: Multi.*message
+    ...                LOG 3 REGEXP: Multi.*message
     Status    PASS
     Log    Hello world!
     Log    Multi\nline\nmessage
@@ -170,20 +229,33 @@ Log message with GLOB
 
 Log message with STARTS
     [Documentation]    LOG 2 STARTS: Hello LOG 2 STARTS: Hell
-    ...    LOG 3 STARTS: Multi
+    ...                LOG 3 STARTS: Multi
     Status    PASS
     Log    Hello world!
     Log    Multi\nline\nmessage
 
+Empty log message
+    [Documentation]    LOG 2
+    Status    PASS
+    Log    ${EMPTY}
+
 NONE log message
-    [Documentation]    LOG 2 NONE LOG 2:1 NONE LOG 3:1 Message LOG 3:2 NONE
+    [Documentation]
+    ...    LOG 2   NONE
+    ...    LOG 2:1 NONE
+    ...    LOG 3:1 Message
+    ...    LOG 3:2 NONE
     Status    PASS
     No Operation
     Log    Message
 
+NONE log message when locator does not match
+    [Documentation]    LOG 1.10.2 NONE
+    Status    FAIL    Keyword 'Status' (locator '1') does not have child in index 10.
+
 Test Setup Check Is Done By SETUP Marker
-    [Documentation]    ...
-    ...    LOG SETUP:1    NONE
+    [Documentation]
+    ...    LOG SETUP:10    NONE
     ...    LOG SETUP.2:1    PASS
     ...    LOG SETUP.2    PASS
     ...    LOG 1:1    KALA
@@ -191,56 +263,56 @@ Test Setup Check Is Done By SETUP Marker
     Log    KALA
 
 Error When No Setup
-    [Documentation]    ...
-    ...    LOG SETUP.1:1    PASS
-    ...    LOG 2:1    KALA
-    Status    FAIL    Expected test Error When No Setup to have setup but setup is not present.
+    [Documentation]
+    ...    LOG setup.1:1    PASS
+    ...    LOG 2:1          KALA
+    Status    FAIL    Test '${TEST NAME}' does not have 'setup'.
     Log    KALA
 
 Test Setup Check Is Done By SETUP Marker and wildcard is used
-    [Documentation]    ...
-    ...    LOG SETUP:1    NONE
+    [Documentation]
+    ...    LOG SETUP:10     NONE
     ...    LOG SETUP.2:*    PASS
-    ...    LOG SETUP.2    PASS
-    ...    LOG 1:*    HAUKI
+    ...    LOG SETUP.2      PASS
+    ...    LOG 1:*          HAUKI
     [Setup]    Status    PASS
     Log    HAUKI
 
-Error When No Setup and wildcard is used
-    [Documentation]    ...
-    ...    LOG SETUP.1:*    PASS
-    ...    LOG 2:*    KALA
-    Status    FAIL    Expected test Error When No Setup and wildcard is used to have setup but setup is not present.
-    Log    KALA
-
 Test Teardown Check Is Done By TEARDOWN Marker
-    [Documentation]    ...
+    [Documentation]
     ...    LOG TEARDOWN:1    foobar
-    ...    LOG TEARDOWN    foobar
+    ...    LOG TEARDOWN      foobar
     Status    PASS
     [Teardown]    Log    foobar
 
 Error When No Teardown
     [Documentation]    LOG TEARDOWN:1    foobar
-    Status    FAIL    Expected test Error When No Teardown to have teardown but teardown is not present.
+    Status    FAIL    Test '${TEST NAME}' does not have 'teardown'.
     Log    KALA
 
 Test Teardown Check Is Done By TEARDOWN Marker and wildcard is used
-    [Documentation]    ...
+    [Documentation]
     ...    LOG TEARDOWN:*    foobar
-    ...    LOG TEARDOWN    foobar
+    ...    LOG TEARDOWN      foobar
     Status    PASS
     [Teardown]    Log    foobar
 
-Error When No Teardown and wildcard is used
-    [Documentation]    LOG TEARDOWN:*    foobar
-    Status    FAIL
-    ...    Expected test Error When No Teardown and wildcard is used to have teardown but teardown is not present.
-    Log    KALA
+Keyword teardown
+    [Documentation]    Keyword setup isn't tested because it isn't supported by all
+    ...                Robot versions we support at the moment.
+    ...
+    ...    LOG    2.teardown.1   DEBUG    User Keyword
+    ...    LOG    2.TEARDOWN.1:1 DEBUG    User Keyword
+    Status    PASS
+    Keyword with teardown
+
+No keyword teardown
+    [Documentation]    LOG    1.teardown.666    Ooops...
+    Status    FAIL    Keyword 'Status' (locator '1') does not have 'teardown'.
 
 Error When NONE is used with wildcard
     [Documentation]    LOG 2.1:* INFO NONE
-    Status    FAIL    Message index wildcard '*' is not supported with expected message 'NONE'.
+    Status    FAIL    Message index wildcard '*' cannot be used with 'NONE' message.
     Logging User Keyword 2
 
 Expected FAIL and log messages
@@ -249,7 +321,9 @@ Expected FAIL and log messages
     ...    LOG 3 Any time now...
     ...    LOG 4:1 FAIL Told ya!!
     ...    LOG 4:2 DEBUG STARTS: Traceback
-    Status    PASS    Test failed as expected.\n\n
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
     ...    Original message:\nTold ya!!
     Log    Failing soon!
     Log    Any time now...
@@ -261,7 +335,9 @@ Expected PASS and log messages
     ...    LOG 3 Any time now...
     ...    LOG 4:1 Execution passed with message:\nTold ya!!
     ...    LOG 4:2 NONE
-    Status    PASS    Told ya!!
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original message:\nTold ya!!
     Log    Passing soon!
     Log    Any time now...
     Pass Execution    Told ya!!
@@ -271,75 +347,85 @@ Expected PASS and log messages with COUNT
     ...    PASS Told ya!!
     ...    LOG 4 COUNT: 2
     ...    LOG 4:2 NONE
-    Status    PASS    Told ya!!
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original message:\nTold ya!!
     Log    Passing soon!
     Log    Any time now...
     Pass Execution    Told ya!!
 
-Expected PASS and teadown does not affect
-    [Documentation]    This text is ignored.
-    ...    LOG 2 Passing soon!
-    Status    PASS    ${EMPTY}
-    Log    Passing soon!
-    [Teardown]    Log    This is logged
-
-FAILURE: Unexpected PASS
-    [Documentation]    FAIL Expected failure does not occur
-    Status    FAIL    Test was expected to FAIL but it PASSED.
-    No Operation
-
-FAILURE: Wrong PASS message
-    Status    FAIL    Wrong message.\n\n
-    ...    Expected:\n\n\n
-    ...    Original message:\nUnexpected message
-    Pass Execution    Unexpected message
-
-FAILURE: Unexpected FAIL
-    Status    FAIL    Test was expected to PASS but it FAILED.\n\n
-    ...    Original message:\n
-    ...    Unexpected error message
-    Fail    Unexpected error message
-
-FAILURE: Wrong message
-    [Documentation]    FAIL Expected failure
-    Status    FAIL    Wrong message.\n\n
-    ...    Expected:\nExpected failure\n\n
-    ...    Original message:\nNot the expected message
-    Fail    Not the expected message
-
 FAILURE: Wrong log message
     [Documentation]    LOG 2 Hello world!
-    Status    FAIL    Keyword 'BuiltIn.Log' (index 2) message 1 has wrong content.\n\n
+    Status    FAIL
+    ...    Keyword 'BuiltIn.Log' has wrong message (locator '2').\n\n
     ...    Expected:\nHello world!\n\n
     ...    Actual:\nHi world!
     Log    Hi world!
 
-FAILURE: Wrong log level
-    [Documentation]    LOG 2.1 Hello world!
-    Status    FAIL    Keyword 'BuiltIn.Log' (index 2.1) message 1 has wrong level.\n\n
+FAILURE: Wrong implicit log level
+    [Documentation]    LOG 2.1 User Keyword
+    Status    FAIL
+    ...    Keyword 'BuiltIn.Log' has message with wrong level (locator '2.1').\n\n
     ...    Expected: INFO\n
-    ...    Actual: DEBUG
+    ...    Actual: \ \ DEBUG
+    Logging User Keyword
+
+FAILURE: Wrong explicit log level
+    [Documentation]    LOG 2.1 WARN User Keyword
+    Status    FAIL
+    ...    Keyword 'BuiltIn.Log' has message with wrong level (locator '2.1').\n\n
+    ...    Expected: WARN\n
+    ...    Actual: \ \ DEBUG
     Logging User Keyword
 
 FAILURE: Unexpected log message
     [Documentation]    LOG 2.1:2 NONE
-    Status    FAIL    Keyword 'BuiltIn.Log Many' (index 2.1) message 2 has wrong content.\n\n
+    Status    FAIL
+    ...    Keyword 'BuiltIn.Log Many' has wrong message (locator '2.1:2').\n\n
     ...    Expected:\nNONE\n\n
     ...    Actual:\nKeyword
     Logging User Keyword 2
 
 FAILURE: Non-existing keyword
     [Documentation]    LOG 2 No keyword here
-    Status    FAIL    No keyword with index '2'.
+    Status    FAIL    Test 'FAILURE: Non-existing keyword' does not have child in index 2.
+
+FAILURE: Non-existing child keyword
+    [Documentation]    LOG 1.10 No keyword here
+    Status    FAIL    Keyword 'Status' (locator '1') does not have child in index 10.
 
 FAILURE: Non-existing log message
     [Documentation]    LOG 2:2 No message here
-    Status    FAIL    Keyword 'BuiltIn.Log' (index 2) does not have message 2.
+    Status    FAIL    Keyword 'BuiltIn.Log' (locator '2') does not have child in index 2.
     Log    Message
 
 FAILURE: Non-existing log message wildcard
     [Documentation]    LOG 1:* Bogus message
-    Status    FAIL    Keyword 'Status' (index 1) does not contain any logs with level INFO and message 'Bogus message'.
+    Status    FAIL    Keyword 'Status' (locator '1') has no message matching 'Bogus message' with level INFO.
+
+FAILURE: Non-existing message in test with wildcard
+    [Documentation]    LOG * WARN Bogus message
+    Status    FAIL    Test '${TEST NAME}' has no message matching 'Bogus message' with level WARN.
+
+FAILURE: Log locator matches keyword
+    [Documentation]    LOG 1 Ooops, this locator points to a keyword.
+    Status    FAIL    Keyword 'Status' (locator '1') does not have message in index 1.
+
+FAILURE: Log locator parent matches message
+    [Documentation]    LOG 2.1.666 Ooops, 2.1 is already a message
+    Status    FAIL    Locator '2.1' matches message and it cannot have child '666'.
+    Log    Hello!
+
+FAILURE: Log locator parent with wildcard matches message
+    [Documentation]    LOG 2.1.* Ooops, 2.1 is already a message
+    Status    FAIL    Locator '2.1' matches message and it cannot have child '*'.
+    Log    Hello!
+
+#Control structures
+#    Fail    FIXME
+#
+#Invalid attribute
+#    Fail    FIXME
 
 
 *** Keywords ***
@@ -349,8 +435,12 @@ Logging User Keyword
 Logging User Keyword 2
     Log Many    User    Keyword
 
+Keyword with teardown
+    No Operation
+    [Teardown]    Logging User Keyword
+
 Status
-    [Arguments]    ${status}    @{message}
-    ${message} =    Catenate    SEPARATOR=    @{message}
+    [Arguments]    ${status}    ${message}=${CHECKED}    @{extra}
+    ${message} =    Catenate    SEPARATOR=    ${message}    @{extra}
     Log    ${status}
     Log    ${message}
