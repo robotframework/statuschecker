@@ -20,18 +20,14 @@ jobs:
     - name: Install dependencies on Python
       if: matrix.python-version != 'pypy3'
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements-dev.txt
-        pip install robotframework==${{ matrix.rf-version }}
-    - name: Install dependencies on pypy3
-      if: matrix.python-version == 'pypy3'
-      run: |
-        python -m pip install --upgrade pip
-        pip install robotframework==${{ matrix.rf-version }}
+        python -m pip install --upgrade pip uv
+        uv pip install --python ${{ matrix.python-version }} --system -r requirements-dev.txt
+        uv pip install --python ${{ matrix.python-version }} --system robotframework==${{ matrix.rf-version }}
     - name: Run lint
-      if: matrix.python-version != 'pypy3'
       run: |
         inv lint
+      env:
+        GITHUB_ACTIONS_RUNNIN_RUFF_LINT: 'true'
     - name: Run tests
       run: |
         python --version

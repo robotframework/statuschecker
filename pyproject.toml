@@ -1,3 +1,52 @@
-[tool.black]
+[tool.ruff]
+exclude = [
+  "__pycache__",
+  ".venv",
+  ".git",
+]
 line-length = 100
-target-version = ['py37']
+lint.ignore = [
+  "T201",   # Use print
+  "N818",   # Exception name check is disabled
+  "PTH100", # abspath is OK
+  "B904",   # Raise inside except block
+  "RET503", # Return statement in finally block
+]
+target-version = "py38"
+lint.select = [
+  "E",
+  "F",
+  "W",
+  "C90",
+  "I",
+  "N",
+  "B",
+  "PYI",
+  "PL",
+  "PTH",
+  "UP",
+  "A",
+  "C4",
+  "DTZ",
+  "ISC",
+  "ICN",
+  "INP",
+  "PIE",
+  "T20",
+  "PYI",
+  "PT",
+  "RSE",
+  "RET",
+  "SIM",
+  "RUF"
+]
+[tool.ruff.lint.per-file-ignores]
+"tasks.py" = [
+  "T201",
+  "PTH123",
+  "PTH120"
+]
+
+[[tool.mypy.overrides]]
+module = ["robot.api.*"]
+follow_untyped_imports = true
