@@ -10,7 +10,7 @@ lint.ignore = [
   "N818",   # Exception name check is disabled
   "PTH100", # abspath is OK
   "B904",   # Raise inside except block
-  "RET503", # Return statement in finally block
+  "RET503", # Not having return is OK
 ]
 target-version = "py38"
 lint.select = [
