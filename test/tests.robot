@@ -1,9 +1,11 @@
 *** Settings ***
-Suite Setup       Log    Suite setup
-Suite Teardown    Log    Suite teardown
+Suite Setup         Log    Suite setup
+Suite Teardown      Log    Suite teardown
+
 
 *** Variables ***
-${CHECKED}        Test status has been checked.
+${CHECKED} =    Test status has been checked.
+
 
 *** Test Cases ***
 Implicit PASS
@@ -216,7 +218,7 @@ Invalid wildcard usage
 
 Log message with REGEXP
     [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
-    ...                LOG 3 REGEXP: Multi.*message
+    ...    LOG 3 REGEXP: Multi.*message
     Status    PASS
     Log    Hello world!
     Log    Multi\nline\nmessage
@@ -229,7 +231,7 @@ Log message with GLOB
 
 Log message with STARTS
     [Documentation]    LOG 2 STARTS: Hello LOG 2 STARTS: Hell
-    ...                LOG 3 STARTS: Multi
+    ...    LOG 3 STARTS: Multi
     Status    PASS
     Log    Hello world!
     Log    Multi\nline\nmessage
@@ -241,7 +243,7 @@ Empty log message
 
 NONE log message
     [Documentation]
-    ...    LOG 2   NONE
+    ...    LOG 2    NONE
     ...    LOG 2:1 NONE
     ...    LOG 3:1 Message
     ...    LOG 3:2 NONE
@@ -265,23 +267,23 @@ Test Setup Check Is Done By SETUP Marker
 Error When No Setup
     [Documentation]
     ...    LOG setup.1:1    PASS
-    ...    LOG 2:1          KALA
+    ...    LOG 2:1    KALA
     Status    FAIL    Test '${TEST NAME}' does not have 'setup'.
     Log    KALA
 
 Test Setup Check Is Done By SETUP Marker and wildcard is used
     [Documentation]
-    ...    LOG SETUP:10     NONE
+    ...    LOG SETUP:10    NONE
     ...    LOG SETUP.2:*    PASS
-    ...    LOG SETUP.2      PASS
-    ...    LOG 1:*          HAUKI
+    ...    LOG SETUP.2    PASS
+    ...    LOG 1:*    HAUKI
     [Setup]    Status    PASS
     Log    HAUKI
 
 Test Teardown Check Is Done By TEARDOWN Marker
     [Documentation]
     ...    LOG TEARDOWN:1    foobar
-    ...    LOG TEARDOWN      foobar
+    ...    LOG TEARDOWN    foobar
     Status    PASS
     [Teardown]    Log    foobar
 
@@ -293,15 +295,15 @@ Error When No Teardown
 Test Teardown Check Is Done By TEARDOWN Marker and wildcard is used
     [Documentation]
     ...    LOG TEARDOWN:*    foobar
-    ...    LOG TEARDOWN      foobar
+    ...    LOG TEARDOWN    foobar
     Status    PASS
     [Teardown]    Log    foobar
 
 Keyword teardown
     [Documentation]    Keyword setup isn't tested because it isn't supported by all
-    ...                Robot versions we support at the moment.
+    ...    Robot versions we support at the moment.
     ...
-    ...    LOG    2.teardown.1   DEBUG    User Keyword
+    ...    LOG    2.teardown.1    DEBUG    User Keyword
     ...    LOG    2.TEARDOWN.1:1 DEBUG    User Keyword
     Status    PASS
     Keyword with teardown
@@ -421,10 +423,10 @@ FAILURE: Log locator parent with wildcard matches message
     Status    FAIL    Locator '2.1' matches message and it cannot have child '*'.
     Log    Hello!
 
-#Control structures
+# Control structures
 #    Fail    FIXME
 #
-#Invalid attribute
+# Invalid attribute
 #    Fail    FIXME
 
 

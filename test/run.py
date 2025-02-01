@@ -15,6 +15,7 @@ from robot.version import VERSION  # noqa
 
 from robotstatuschecker import process_output  # noqa
 
+
 def check_tests(robot_file):
     output = _run_tests_and_process_output(robot_file)
     result = ExecutionResult(output)
@@ -50,23 +51,27 @@ class StatusCheckerChecker(ResultVisitor):
     def _verify(self, test):
         status, message = self._get_expected(test)
         if test.status != status:
-            raise AssertionError(f"Test '{test.name}' had wrong status.\n"
-                                 f"{'- ' * 39}\n"
-                                 f"Expected: {status}\n"
-                                 f"Message:\n{message}\n"
-                                 f"{'- ' * 39}\n"
-                                 f"Actual: {test.status}\n"
-                                 f"Message:\n{test.message}")
+            raise AssertionError(
+                f"Test '{test.name}' had wrong status.\n"
+                f"{'- ' * 39}\n"
+                f"Expected: {status}\n"
+                f"Message:\n{message}\n"
+                f"{'- ' * 39}\n"
+                f"Actual: {test.status}\n"
+                f"Message:\n{test.message}"
+            )
         if test.message != message:
-            raise AssertionError(f"Test '{test.name}' had wrong message.\n"
-                                 f"{'- ' * 39}\n"
-                                 f"Expected:\n{message}\n"
-                                 f"{'- ' * 39}\n"
-                                 f"Actual:\n{test.message}")
+            raise AssertionError(
+                f"Test '{test.name}' had wrong message.\n"
+                f"{'- ' * 39}\n"
+                f"Expected:\n{message}\n"
+                f"{'- ' * 39}\n"
+                f"Actual:\n{test.message}"
+            )
 
     def _get_expected(self, test):
         kw = test.setup or test.body[0]
-        assert kw.name == 'Status', 'Status keyword missing!'
+        assert kw.name == "Status", "Status keyword missing!"
         return (kw.body[1].messages[0].message, kw.body[2].messages[0].message)
 
     def print_status(self):
