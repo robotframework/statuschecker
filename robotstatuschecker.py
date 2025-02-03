@@ -188,7 +188,7 @@ class StatusAndMessageChecker(BaseChecker):
 
     def check(self, test: TestCase) -> bool:
         if test.status != self.status:
-            self._fail(test, f"Expected status {self.status}, got {test.status}.")
+            self._fail(test, f"Expected {self.status} status, got {test.status}.")
             return False
         if not self._message_matches(test.message, self.message):
             self._fail(test, f"Wrong message.\n\nExpected:\n{self.message}")

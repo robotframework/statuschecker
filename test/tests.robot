@@ -8,16 +8,28 @@ ${CHECKED} =    Test status has been checked.
 
 
 *** Test Cases ***
-Implicit PASS
+Expected implicit PASS
     Status    PASS
     No Operation
 
-Explicit PASS with message
+Expected explicit PASS
     [Documentation]    PASS The message
     Status    PASS
     ...    ${CHECKED}\n\n
     ...    Original message:\nThe message
     Pass Execution    The message
+
+Expect PASS got FAIL
+    Status    FAIL
+    ...    Expected PASS status, got FAIL.\n\n
+    ...    Original message:\nOoops!
+    Fail    Ooops!
+
+Expect PASS got SKIP
+    Status    FAIL
+    ...    Expected PASS status, got SKIP.\n\n
+    ...    Original message:\nOoops!
+    Skip    Ooops!
 
 PASS with wrong message
     [Documentation]    PASS The message
@@ -25,25 +37,24 @@ PASS with wrong message
     ...    Wrong message.\n\n
     ...    Expected:\nThe message
 
-Expect PASS got FAIL
-    Status    FAIL
-    ...    Expected status PASS, got FAIL.\n\n
-    ...    Original message:\nOoops!
-    Fail    Ooops!
-
-Expect PASS got SKIP
-    Status    FAIL
-    ...    Expected status PASS, got SKIP.\n\n
-    ...    Original message:\nOoops!
-    Skip    Ooops!
-
-SKIP
+Expected SKIP
     [Documentation]    SKIP The message
     Status    PASS
     ...    ${CHECKED}\n\n
     ...    Original status: SKIP\n\n
     ...    Original message:\nThe message
     Skip    The message
+
+Expect SKIP got PASS
+    [Documentation]    SKIP This won't happen!
+    Status    FAIL    Expected SKIP status, got PASS.
+
+Expect SKIP got FAIL
+    [Documentation]    SKIP This won't happen!
+    Status    FAIL
+    ...    Expected SKIP status, got FAIL.\n\n
+    ...    Original message:\nThis happens!
+    Fail    This happens!
 
 SKIP with wrong message
     [Documentation]    SKIP The message
@@ -53,18 +64,7 @@ SKIP with wrong message
     ...    Original message:\nxxx
     Skip    xxx
 
-Expect SKIP got PASS
-    [Documentation]    SKIP This won't happen!
-    Status    FAIL    Expected status SKIP, got PASS.
-
-Expect SKIP got FAIL
-    [Documentation]    SKIP This won't happen!
-    Status    FAIL
-    ...    Expected status SKIP, got FAIL.\n\n
-    ...    Original message:\nThis happens!
-    Fail    This happens!
-
-FAIL
+Expected FAIL
     [Documentation]    Text before the marker is ignored. FAIL Expected failure
     Status    PASS
     ...    ${CHECKED}\n\n
@@ -74,12 +74,12 @@ FAIL
 
 Expect FAIL got PASS
     [Documentation]    FAIL This won't happen!
-    Status    FAIL    Expected status FAIL, got PASS.
+    Status    FAIL    Expected FAIL status, got PASS.
 
 Expect FAIL got SKIP
     [Documentation]    FAIL This won't happen!
     Status    FAIL
-    ...    Expected status FAIL, got SKIP.\n\n
+    ...    Expected FAIL status, got SKIP.\n\n
     ...    Original message:\nThis happens!
     Skip    This happens!
 
@@ -115,7 +115,7 @@ FAIL with STARTS
     ...    Original message:\nThis is start and this is end
     Fail    This is start and this is end
 
-Log matching keyword
+Log matching message parent
     [Documentation]    LOG 2 Hello world!
     Status    PASS
     Log    Hello world!
