@@ -131,7 +131,8 @@ class ExpectedLog:
         self.locator_str = locator
         # ':' is legacy message separator. It was softly deprecated in v4.0.
         self.locator = [
-            self._parse_locator_part(part) for part in locator.replace(":", ".").split(".")
+            self._parse_locator_part(part)
+            for part in locator.replace(":", ".").split(".")
         ]
         self.level, self.message = self._split_level(message)
 
@@ -216,7 +217,8 @@ class LogMessageChecker(BaseChecker):
             if isinstance(item, Message):
                 locator = ".".join(str(part) for part in expected.locator[:level])
                 raise NotFound(
-                    f"Locator '{locator}' matches message and it cannot have child '{part}'."
+                    f"Locator '{locator}' matches message and it cannot have "
+                    f"child '{part}'."
                 )
             if part == "*":
                 self._check_message_by_wildcard(item, expected, level)
@@ -245,7 +247,9 @@ class LogMessageChecker(BaseChecker):
                 return item
             raise NotFound(f"{prefix} does not have message in index {index}.")
         except IndexError:
-            if expected.message == "NONE" and (level is None or len(expected.locator) == level + 1):
+            if expected.message == "NONE" and (
+                level is None or len(expected.locator) == level + 1
+            ):
                 raise CheckOk
             raise NotFound(f"{prefix} does not have child in index {index}.")
 
@@ -262,7 +266,9 @@ class LogMessageChecker(BaseChecker):
         prefix = self._get_error_prefix(parent, expected.locator[:level])
         raise NotFound(f"{prefix} does not have '{attribute}'.")
 
-    def _get_error_prefix(self, parent: "TestCase|BodyItem", locator: "list[str|int]") -> str:
+    def _get_error_prefix(
+        self, parent: "TestCase|BodyItem", locator: "list[str|int]"
+    ) -> str:
         typ = getattr(parent, "type", "TEST")  # `TestCase.type` is new in RF 7.2.
         prefix = f"{typ.title()} '{self._get_name(parent)}'"
         if locator:
@@ -287,7 +293,9 @@ class LogMessageChecker(BaseChecker):
                 f"the last locator item, got '{expected.locator_str}."
             )
         if expected.message == "NONE":
-            raise InvalidUsage("Message index wildcard '*' cannot be used with 'NONE' message.")
+            raise InvalidUsage(
+                "Message index wildcard '*' cannot be used with 'NONE' message."
+            )
         for item in parent.body:
             if (
                 isinstance(item, Message)
@@ -297,7 +305,8 @@ class LogMessageChecker(BaseChecker):
                 return
         prefix = self._get_error_prefix(parent, expected.locator[:level])
         raise AssertionError(
-            f"{prefix} has no message matching '{expected.message}' with level {expected.level}."
+            f"{prefix} has no message matching '{expected.message}' with "
+            f"level {expected.level}."
         )
 
     def _level_matches(self, actual: str, expected: str) -> bool:

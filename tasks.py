@@ -86,7 +86,9 @@ def release_notes(ctx, version=None, username=None, password=None, write=False):
     folder = RELEASE_NOTES_PATH.parent.resolve()
     folder.mkdir(parents=True, exist_ok=True)
     file = RELEASE_NOTES_PATH if write else sys.stdout
-    generator = ReleaseNotesGenerator(REPOSITORY, RELEASE_NOTES_TITLE, RELEASE_NOTES_INTRO)
+    generator = ReleaseNotesGenerator(
+        REPOSITORY, RELEASE_NOTES_TITLE, RELEASE_NOTES_INTRO
+    )
     generator.generate(version, username, password, file)
 
 

@@ -30,7 +30,9 @@ def _run_tests_and_process_output(robot_file):
     output = join(results, "output.xml")
     if exists(results):
         rmtree(results)
-    run(join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG")
+    run(
+        join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG"
+    )
     process_output(output)
     rebot(output, outputdir=results)
     return output
@@ -85,7 +87,9 @@ class StatusCheckerChecker(ResultVisitor):
         else:
             print(f"All {self.tests} tests passed/failed/logged/skipped as expected.")
             print("-" * 78)
-        print(f"Robot Framework {VERSION} on {python_implementation()} {python_version()}.")
+        print(
+            f"Robot Framework {VERSION} on {python_implementation()} {python_version()}."
+        )
 
 
 if __name__ == "__main__":
