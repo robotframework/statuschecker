@@ -74,8 +74,8 @@ def process_output(in_path: "str|Path", out_path: "str|Path|None" = None) -> int
 
 
 class StatusChecker(ResultVisitor):
-    def check(self, in_path: str, out_path: "str|None" = None) -> Result:
-        result = ExecutionResult(in_path)
+    def check(self, in_path: "str|Path", out_path: "str|None" = None) -> Result:
+        result = ExecutionResult(str(in_path))  # Old RF versions do not accept Path.
         result.suite.visit(self)
         result.save(out_path)
         return result
@@ -310,7 +310,7 @@ class LogMessageChecker(BaseChecker):
         )
 
     def _level_matches(self, actual: str, expected: str) -> bool:
-        return actual == expected or expected == "ANY"  # noqa: PLR1714
+        return expected in (actual, "ANY")
 
     def _check_message(self, message: Message, expected: ExpectedLog):
         name = self._get_name(message.parent)

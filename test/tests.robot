@@ -19,6 +19,12 @@ Explicit PASS with message
     ...    Original message:\nThe message
     Pass Execution    The message
 
+PASS with wrong message
+    [Documentation]    PASS The message
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nThe message
+
 Expect PASS got FAIL
     Status    FAIL
     ...    Expected status PASS, got FAIL.\n\n
@@ -31,12 +37,6 @@ Expect PASS got SKIP
     ...    Original message:\nOoops!
     Skip    Ooops!
 
-PASS with wrong message
-    [Documentation]    PASS The message
-    Status    FAIL
-    ...    Wrong message.\n\n
-    ...    Expected:\nThe message
-
 SKIP
     [Documentation]    SKIP The message
     Status    PASS
@@ -44,6 +44,14 @@ SKIP
     ...    Original status: SKIP\n\n
     ...    Original message:\nThe message
     Skip    The message
+
+SKIP with wrong message
+    [Documentation]    SKIP The message
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nThe message\n\n
+    ...    Original message:\nxxx
+    Skip    xxx
 
 Expect SKIP got PASS
     [Documentation]    SKIP This won't happen!
@@ -55,14 +63,6 @@ Expect SKIP got FAIL
     ...    Expected status SKIP, got FAIL.\n\n
     ...    Original message:\nThis happens!
     Fail    This happens!
-
-SKIP with wrong message
-    [Documentation]    SKIP The message
-    Status    FAIL
-    ...    Wrong message.\n\n
-    ...    Expected:\nThe message\n\n
-    ...    Original message:\nxxx
-    Skip    xxx
 
 FAIL
     [Documentation]    Text before the marker is ignored. FAIL Expected failure
@@ -82,6 +82,14 @@ Expect FAIL got SKIP
     ...    Expected status FAIL, got SKIP.\n\n
     ...    Original message:\nThis happens!
     Skip    This happens!
+
+FAIL with wrong message
+    [Documentation]    FAIL Wrong
+    Status    FAIL
+    ...    Wrong message.\n\n
+    ...    Expected:\nWrong\n\n
+    ...    Original message:\nMessage
+    Fail    Message
 
 FAIL with REGEXP
     [Documentation]    FAIL REGEXP: Pattern is here.* \\d+
@@ -106,14 +114,6 @@ FAIL with STARTS
     ...    Original status: FAIL\n\n
     ...    Original message:\nThis is start and this is end
     Fail    This is start and this is end
-
-FAIL with wrong message
-    [Documentation]    FAIL Wrong
-    Status    FAIL
-    ...    Wrong message.\n\n
-    ...    Expected:\nWrong\n\n
-    ...    Original message:\nMessage
-    Fail    Message
 
 Log matching keyword
     [Documentation]    LOG 2 Hello world!

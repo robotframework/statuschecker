@@ -27,10 +27,11 @@ def check_tests(robot_file):
 
 def _run_tests_and_process_output(robot_file):
     results = CURDIR / "results"
-    output = results / "output.xml"
+    output = str(results / "output.xml")
+    robot_path = str(CURDIR / robot_file)
     if results.exists():
         shutil.rmtree(results)
-    run(CURDIR / robot_file, output=output, log=None, report=None, loglevel="DEBUG")
+    run(robot_path, output=output, log=None, report=None, loglevel="DEBUG")
     process_output(output)
     rebot(output, outputdir=results)
     return output
