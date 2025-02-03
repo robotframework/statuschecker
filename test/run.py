@@ -5,7 +5,7 @@ import sys
 from pathlib import Path
 from platform import python_implementation, python_version
 
-from robot import run, rebot
+from robot import rebot, run
 from robot.api import ExecutionResult, ResultVisitor
 
 CURDIR = Path(__file__).resolve().parent
@@ -86,7 +86,8 @@ class StatusCheckerChecker(ResultVisitor):
             print(f"All {self.tests} tests passed/failed/logged/skipped as expected.")
             print("-" * 78)
         print(
-            f"Robot Framework {VERSION} on {python_implementation()} {python_version()}."
+            f"Robot Framework {VERSION} on {python_implementation()} "
+            f"{python_version()}."
         )
 
 

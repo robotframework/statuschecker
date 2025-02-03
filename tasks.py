@@ -12,6 +12,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
 import os
 import sys
 from pathlib import Path
@@ -28,14 +29,13 @@ RELEASE_NOTES_TITLE = "robotstatuschecker {version}"
 RELEASE_NOTES_INTRO = """
 StatusChecker is a tool for validating that executed `Robot Framework`_ test cases
 have expected statuses and log messages. It is mainly useful for Robot Framework
-test library developers who want to use Robot Framework to also test their libraries.
-StatusChecker 1.4 and newer are compatible both with Python 2 and Python 3.
+library developers who want to use Robot Framework to also test their libraries.
 
 StatusChecker project is hosted at GitHub and downloads are at PyPI_
 .. _Robot Framework: http://robotframework.org
 .. _PyPI: https://github.com/robotframework/statuschecker
 .. _issue tracker: https://github.com/robotframework/SeleniumLibrary/issues?q=milestone%3A{version.milestone}
-"""  # noqa
+"""
 
 IS_GITHUB_ACTIONS = os.environ.get("GITHUB_ACTIONS_RUNNIN_RUFF_LINT")
 
@@ -108,31 +108,34 @@ def init_labels(ctx, username=None, password=None):
 
 @task
 def lint(ctx):
-    """Run linters
+    """Run linters, type checkers and formatters.
 
-    Ruff, mypy and robotframework-tidy
+    Ruff, mypy and Robotidy.
     """
     ruff_format = "ruff format"
     ruff_check = "ruff check"
+    mypy = r"mypy --exclude \.venv robotstatuschecker.py"
+    tidy = " ".join(
+        [
+            "robotidy",
+            "--lineseparator",
+            "unix",
+            "--configure",
+            "NormalizeAssignments:equal_sign_type=space_and_equal_sign",
+            "--configure",
+            "NormalizeAssignments:equal_sign_type_variables=space_and_equal_sign",
+            "test",
+        ]
+    )
     if IS_GITHUB_ACTIONS:
         ruff_format = f"{ruff_format} --check"
     else:
         ruff_check = f"{ruff_check} --fix"
-    ruff_check = f"{ruff_check} robotstatuschecker.py"
-    print(f"Running ruff format· {ruff_format}")
+    print(f"Formatting ({ruff_format}):")
     ctx.run(ruff_format)
-    print(f"Running ruff check: {ruff_check}")
-    ctx.run("ruff check robotstatuschecker.py")
-    print("Running mypy")
-    ctx.run("mypy --exclude \\.venv robotstatuschecker.py")
-    tidy_command = [
-        "robotidy",
-        "--lineseparator",
-        "unix",
-        "--configure",
-        "NormalizeAssignments:equal_sign_type=space_and_equal_sign",
-        "--configure",
-        "NormalizeAssignments:equal_sign_type_variables=space_and_equal_sign",
-        "test",
-    ]
-    ctx.run(" ".join(tidy_command))
+    print(f"\nLinting ({ruff_check}):")
+    ctx.run(ruff_check)
+    print(f"\nType checking ({mypy}):")
+    ctx.run(mypy)
+    print(f"\nTidy ({tidy}):")
+    ctx.run(tidy)

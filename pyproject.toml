@@ -9,6 +9,7 @@ lint.ignore = [
   "T201",      # Allow print
   "N818",      # Don't require exceptions names to end with Error
   "PTH100",    # Allow using os.path (we want normpath() instead of Path.resolve())
+  "PTH123",    # Allow using open() instead of Path.open()
   "B904",      # Don't require from clause with raise inside except
   "SIM102",    # Don't force combining nested ifs
 ]
@@ -39,12 +40,6 @@ lint.select = [
   "RET",
   "SIM",
   "RUF"
-]
-[tool.ruff.lint.per-file-ignores]
-"tasks.py" = [
-  "T201",
-  "PTH123",
-  "PTH120"
 ]
 
 [[tool.mypy.overrides]]
