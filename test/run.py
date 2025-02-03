@@ -1,15 +1,15 @@
 #!/usr/bin/env python
 
+import shutil
 import sys
-from os.path import abspath, dirname, exists, join
+from pathlib import Path
 from platform import python_implementation, python_version
-from shutil import rmtree
 
 from robot import run, rebot
 from robot.api import ExecutionResult, ResultVisitor
 
-CURDIR = dirname(abspath(__file__))
-sys.path.insert(0, dirname(CURDIR))
+CURDIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(CURDIR.parent))
 
 from robot.version import VERSION  # noqa
 
@@ -26,13 +26,11 @@ def check_tests(robot_file):
 
 
 def _run_tests_and_process_output(robot_file):
-    results = join(CURDIR, "results")
-    output = join(results, "output.xml")
-    if exists(results):
-        rmtree(results)
-    run(
-        join(CURDIR, robot_file), output=output, log=None, report=None, loglevel="DEBUG"
-    )
+    results = CURDIR / "results"
+    output = results / "output.xml"
+    if results.exists():
+        shutil.rmtree(results)
+    run(CURDIR / robot_file, output=output, log=None, report=None, loglevel="DEBUG")
     process_output(output)
     rebot(output, outputdir=results)
     return output

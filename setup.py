@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from setuptools import setup
-
-from os.path import abspath, dirname, join
 import re
+from pathlib import Path
+
+from setuptools import setup
 
 NAME = "robotstatuschecker"
 CLASSIFIERS = """
@@ -14,10 +14,10 @@ Programming Language :: Python :: 3
 Topic :: Software Development :: Testing
 Framework :: Robot Framework
 """.strip().splitlines()
-CURDIR = dirname(abspath(__file__))
-with open(join(CURDIR, NAME + ".py")) as f:
+CURDIR = Path(__file__).resolve().parent
+with open(CURDIR / (NAME + ".py")) as f:
     VERSION = re.search('\n__version__ = "(.*)"\n', f.read()).group(1)
-with open(join(CURDIR, "README.rst")) as f:
+with open(CURDIR / "README.rst") as f:
     README = f.read()
 
 setup(
