@@ -6,11 +6,11 @@ exclude = [
 ]
 line-length = 100
 lint.ignore = [
-  "T201",   # Use print
-  "N818",   # Exception name check is disabled
-  "PTH100", # abspath is OK
-  "B904",   # Raise inside except block
-  "RET503", # Not having return is OK
+  "T201",      # Allow print
+  "N818",      # Don't require exceptions names to end with Error
+  "PTH100",    # Allow using os.path (we want normpath() instead of Path.resolve())
+  "B904",      # Don't require from clause with raise inside except
+  "SIM102",    # Don't force combining nested ifs
 ]
 target-version = "py38"
 lint.select = [

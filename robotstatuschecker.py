@@ -82,10 +82,9 @@ class StatusChecker(ResultVisitor):
 
     def visit_test(self, test: TestCase):
         expected = Expected(test.doc)
-        if StatusAndMessageChecker(expected).check(test) and LogMessageChecker(expected).check(
-            test
-        ):
-            self._mark_checked(test)
+        if StatusAndMessageChecker(expected).check(test):
+            if LogMessageChecker(expected).check(test):
+                self._mark_checked(test)
 
     def _mark_checked(self, test: TestCase):
         message = "Test status has been checked."
@@ -220,7 +219,8 @@ class LogMessageChecker(BaseChecker):
                     f"Locator '{locator}' matches message and it cannot have child '{part}'."
                 )
             if part == "*":
-                return self._check_message_by_wildcard(item, expected, level)
+                self._check_message_by_wildcard(item, expected, level)
+                return
             if isinstance(part, int):
                 item = self._get_item_by_index(item, part, expected, level)
             else:
