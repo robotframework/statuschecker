@@ -7,17 +7,16 @@ from platform import python_implementation, python_version
 
 from robot import rebot, run
 from robot.api import ExecutionResult, ResultVisitor
+from robot.version import VERSION
 
 CURDIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(CURDIR.parent))
 
-from robot.version import VERSION  # noqa
-
 from robotstatuschecker import process_output  # noqa
 
 
-def check_tests(robot_file):
-    output = _run_tests_and_process_output(robot_file)
+def main():
+    output = run_tests_and_process_output()
     result = ExecutionResult(output)
     checker = StatusCheckerChecker()
     result.suite.visit(checker)
@@ -25,15 +24,14 @@ def check_tests(robot_file):
     sys.exit(len(checker.errors))
 
 
-def _run_tests_and_process_output(robot_file):
+def run_tests_and_process_output():
     results = CURDIR / "results"
     output = str(results / "output.xml")
-    robot_path = str(CURDIR / robot_file)
     if results.exists():
         shutil.rmtree(results)
-    run(robot_path, output=output, log=None, report=None, loglevel="DEBUG")
+    run(str(CURDIR), output=output, log=None, report=None, loglevel="DEBUG")
     process_output(output)
-    rebot(output, outputdir=results)
+    rebot(output, outputdir=str(results))
     return output
 
 
@@ -93,4 +91,4 @@ class StatusCheckerChecker(ResultVisitor):
 
 
 if __name__ == "__main__":
-    check_tests("tests.robot")
+    main()
