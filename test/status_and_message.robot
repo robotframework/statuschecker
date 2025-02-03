@@ -110,6 +110,19 @@ FAIL with STARTS
     ...    Original message:\nThis is start and this is end
     Fail    This is start and this is end
 
+Status with log message
+    [Documentation]    This text is ignored.
+    ...    FAIL Expected
+    ...    LOG 1.2 PASS
+    ...    LOG 2   Hello!
+    ...    LOG 3.1 FAIL Expected
+    ...    LOG 3.2 DEBUG STARTS: Traceback
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
+    ...    Original message:\nExpected
+    Log     Hello!
+    Fail    Expected
 
 *** Keywords ***
 Status

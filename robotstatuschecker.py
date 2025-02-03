@@ -270,7 +270,10 @@ class LogMessageChecker(BaseChecker):
         self, parent: "TestCase|BodyItem", locator: "list[str|int]"
     ) -> str:
         typ = getattr(parent, "type", "TEST")  # `TestCase.type` is new in RF 7.2.
-        prefix = f"{typ.title()} '{self._get_name(parent)}'"
+        if typ in ("TEST", "KEYWORD"):
+            prefix = f"{typ.title()} '{self._get_name(parent)}'"
+        else:
+            prefix = self._get_name(parent)
         if locator:
             locator_str = ".".join(str(part) for part in locator)
             prefix += f" (locator '{locator_str}')"
@@ -290,7 +293,7 @@ class LogMessageChecker(BaseChecker):
         if len(expected.locator) != level + 1:
             raise InvalidUsage(
                 f"Message index wildcard '*' can be used only as "
-                f"the last locator item, got '{expected.locator_str}."
+                f"the last locator item, got '{expected.locator_str}'."
             )
         if expected.message == "NONE":
             raise InvalidUsage(

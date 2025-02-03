@@ -1,49 +1,27 @@
-*** Variables ***
-${CHECKED} =    Test status has been checked.
-
-
 *** Test Cases ***
-Log matching message parent
+Match message parent
     [Documentation]    LOG 2 Hello world!
     Status    PASS
     Log    Hello world!
 
-Log matching message
-    [Documentation]    LOG 2.1 Hello world!
+Match message directly
+    [Documentation]    LOG 2.1 Hello LOG 2.2 world LOG 2.3 !
     Status    PASS
-    Log    Hello world!
+    Log Many    Hello    world    !
 
-Log message with message index
+Match message using legacy syntax
     [Documentation]    LOG 2:1 Hello LOG 2:2 world LOG 2:3 !
     Status    PASS
     Log Many    Hello    world    !
 
-Log messages with levels
-    [Documentation]    LOG 2 DEBUG Hello
-    ...    LOG 3 WARN World
-    ...    LOG 4 ERROR Tidii
-    Status    PASS
-    Log    Hello    DEBUG
-    Log    World    WARN
-    Log    Tidii    ERROR
-
-Trailing and leading whitespace is ignored in log messages
+Messages in child keywords
     [Documentation]
-    ...    LOG 2 \${ret} = ${EMPTY}
-    ...    LOG 2 \${ret} =
-    ...    LOG 3 xxx
-    Status    PASS
-    ${ret} =    Set Variable    ${EMPTY}
-    Log    ${SPACE*10}xxx${SPACE*10}
-
-Log messages deeper
-    [Documentation]
-    ...    LOG 2:1 Hello
-    ...    LOG 2:2 World
+    ...    LOG 2.1 Hello
+    ...    LOG 2.2 World
     ...    LOG 3.1 DEBUG User Keyword
-    ...    LOG 4.1:1 User
-    ...    LOG 4.1:2 Keyword
-    ...    LOG 5.1:2 DEBUG STARTS: Traceback (most recent call last):
+    ...    LOG 4.1.1 User
+    ...    LOG 4.1.2 Keyword
+    ...    LOG 5.1.2 DEBUG STARTS: Traceback (most recent call last):
     Status    PASS
     Log Many    Hello    World
     Logging User Keyword
@@ -51,200 +29,29 @@ Log messages deeper
     Run Keyword And Ignore Error
     ...    Fail    My Error Here
 
-Log messages deeper with setup
-    [Documentation]
-    ...    LOG 1:1 Hello
-    ...    LOG 1:2 World
-    ...    LOG 2.1 DEBUG User Keyword
-    ...    LOG 3.1:1 User
-    ...    LOG 3.1:2 Keyword
-    ...    LOG 4.1:2 DEBUG STARTS: Traceback (most recent call last):
-    [Setup]    Status    PASS
-    Log Many    Hello    World
-    Logging User Keyword
-    Logging User Keyword 2
-    Run Keyword And Ignore Error
-    ...    Fail    My Error Here
+Non-existing keyword
+    [Documentation]    LOG 2 No keyword here
+    Status    FAIL    Test '${TEST NAME}' does not have child in index 2.
 
-Log messages deeper with wildcard
-    [Documentation]
-    ...    LOG 2:1 Hello
-    ...    LOG 2:2 ANY World
-    ...    LOG 3.1 DEBUG User Keyword
-    ...    LOG 4.1:* User
-    ...    LOG 4.1:* ANY Keyword
-    ...    LOG 5.1:* DEBUG STARTS: Traceback (most recent call last):
-    ...    LOG 6.1:* ANY REGEXP: .*recent.*
-    ...    LOG 6.1:* DEBUG REGEXP: .*recent.*
-    Status    PASS
-    Log Many    Hello    World
-    Logging User Keyword
-    Logging User Keyword 2
-    Run Keyword And Ignore Error
-    ...    Fail    My Error Here
-    Run Keyword And Ignore Error
-    ...    Fail    'recent call' in two different log levels
-
-Log messages deeper with wildcard and setup
-    [Documentation]
-    ...    LOG 1:1 Hello
-    ...    LOG 1:2 ANY World
-    ...    LOG 2.1 DEBUG User Keyword
-    ...    LOG 3.1:* User
-    ...    LOG 3.1:* ANY Keyword
-    ...    LOG 4.1:* DEBUG STARTS: Traceback (most recent call last):
-    [Setup]    Status    PASS
-    Log Many    Hello    World
-    Logging User Keyword
-    Logging User Keyword 2
-    Run Keyword And Ignore Error
-    ...    Fail    My Error Here
-
-Invalid wildcard usage
-    [Documentation]    LOG 1.*.2 Ooops
-    Status    FAIL    Message index wildcard '*' can be used only as the last locator item, got '1.*.2.
-
-Log message with REGEXP
-    [Documentation]    LOG 2 REGEXP: H[ei]l{2}o w\\w+! LOG 2 REGEXP: Hell.*
-    ...    LOG 3 REGEXP: Multi.*message
-    Status    PASS
-    Log    Hello world!
-    Log    Multi\nline\nmessage
-
-Log message with GLOB
-    [Documentation]    LOG 2 GLOB: *world! LOG 2 GLOB: Hell? ***!
-    Status    PASS
-    Log    Hello world!
-    Log    Multi\nline\nmessage
-
-Log message with STARTS
-    [Documentation]    LOG 2 STARTS: Hello LOG 2 STARTS: Hell
-    ...    LOG 3 STARTS: Multi
-    Status    PASS
-    Log    Hello world!
-    Log    Multi\nline\nmessage
-
-Empty log message
-    [Documentation]    LOG 2
-    Status    PASS
-    Log    ${EMPTY}
-
-NONE log message
-    [Documentation]
-    ...    LOG 2    NONE
-    ...    LOG 2:1 NONE
-    ...    LOG 3:1 Message
-    ...    LOG 3:2 NONE
-    Status    PASS
-    No Operation
-    Log    Message
-
-NONE log message when locator does not match
-    [Documentation]    LOG 1.10.2 NONE
+Non-existing child keyword
+    [Documentation]    LOG 1.10 No keyword here
     Status    FAIL    Keyword 'Status' (locator '1') does not have child in index 10.
 
-Test Setup Check Is Done By SETUP Marker
-    [Documentation]
-    ...    LOG SETUP:10    NONE
-    ...    LOG SETUP.2:1    PASS
-    ...    LOG SETUP.2    PASS
-    ...    LOG 1:1    KALA
-    [Setup]    Status    PASS
-    Log    KALA
+Non-existing message
+    [Documentation]    LOG 2.2 No message here
+    Status    FAIL    Keyword 'BuiltIn.Log' (locator '2') does not have child in index 2.
+    Log    Message
 
-Error When No Setup
-    [Documentation]
-    ...    LOG setup.1:1    PASS
-    ...    LOG 2:1    KALA
-    Status    FAIL    Test '${TEST NAME}' does not have 'setup'.
-    Log    KALA
+Locator matches keyword
+    [Documentation]    LOG 1 Ooops, this locator points to a keyword!
+    Status    FAIL    Keyword 'Status' (locator '1') does not have message in index 1.
 
-Test Setup Check Is Done By SETUP Marker and wildcard is used
-    [Documentation]
-    ...    LOG SETUP:10    NONE
-    ...    LOG SETUP.2:*    PASS
-    ...    LOG SETUP.2    PASS
-    ...    LOG 1:*    HAUKI
-    [Setup]    Status    PASS
-    Log    HAUKI
+Locator parent matches message
+    [Documentation]    LOG 2.1.666 Ooops, 2.1 is already a message
+    Status    FAIL    Locator '2.1' matches message and it cannot have child '666'.
+    Log    Hello!
 
-Test Teardown Check Is Done By TEARDOWN Marker
-    [Documentation]
-    ...    LOG TEARDOWN:1    foobar
-    ...    LOG TEARDOWN    foobar
-    Status    PASS
-    [Teardown]    Log    foobar
-
-Error When No Teardown
-    [Documentation]    LOG TEARDOWN:1    foobar
-    Status    FAIL    Test '${TEST NAME}' does not have 'teardown'.
-    Log    KALA
-
-Test Teardown Check Is Done By TEARDOWN Marker and wildcard is used
-    [Documentation]
-    ...    LOG TEARDOWN:*    foobar
-    ...    LOG TEARDOWN    foobar
-    Status    PASS
-    [Teardown]    Log    foobar
-
-Keyword teardown
-    [Documentation]    Keyword setup isn't tested because it isn't supported by all
-    ...    Robot versions we support at the moment.
-    ...
-    ...    LOG    2.teardown.1    DEBUG    User Keyword
-    ...    LOG    2.TEARDOWN.1:1 DEBUG    User Keyword
-    Status    PASS
-    Keyword with teardown
-
-No keyword teardown
-    [Documentation]    LOG    1.teardown.666    Ooops...
-    Status    FAIL    Keyword 'Status' (locator '1') does not have 'teardown'.
-
-Error When NONE is used with wildcard
-    [Documentation]    LOG 2.1:* INFO NONE
-    Status    FAIL    Message index wildcard '*' cannot be used with 'NONE' message.
-    Logging User Keyword 2
-
-Expected FAIL and log messages
-    [Documentation]    This text is ignored. FAIL Told ya!!
-    ...    LOG 2 Failing soon!
-    ...    LOG 3 Any time now...
-    ...    LOG 4:1 FAIL Told ya!!
-    ...    LOG 4:2 DEBUG STARTS: Traceback
-    Status    PASS
-    ...    ${CHECKED}\n\n
-    ...    Original status: FAIL\n\n
-    ...    Original message:\nTold ya!!
-    Log    Failing soon!
-    Log    Any time now...
-    Fail    Told ya!!
-
-Expected PASS and log messages
-    [Documentation]    This text is ignored. PASS Told ya!!
-    ...    LOG 2 Passing soon!
-    ...    LOG 3 Any time now...
-    ...    LOG 4:1 Execution passed with message:\nTold ya!!
-    ...    LOG 4:2 NONE
-    Status    PASS
-    ...    ${CHECKED}\n\n
-    ...    Original message:\nTold ya!!
-    Log    Passing soon!
-    Log    Any time now...
-    Pass Execution    Told ya!!
-
-Expected PASS and log messages with COUNT
-    [Documentation]
-    ...    PASS Told ya!!
-    ...    LOG 4 COUNT: 2
-    ...    LOG 4:2 NONE
-    Status    PASS
-    ...    ${CHECKED}\n\n
-    ...    Original message:\nTold ya!!
-    Log    Passing soon!
-    Log    Any time now...
-    Pass Execution    Told ya!!
-
-FAILURE: Wrong log message
+Wrong message
     [Documentation]    LOG 2 Hello world!
     Status    FAIL
     ...    Keyword 'BuiltIn.Log' has wrong message (locator '2').\n\n
@@ -252,7 +59,20 @@ FAILURE: Wrong log message
     ...    Actual:\nHi world!
     Log    Hi world!
 
-FAILURE: Wrong implicit log level
+Log levels
+    [Documentation]
+    ...    LOG 2    DEBUG  Hello
+    ...    LOG 2    ANY    Hello
+    ...    LOG 3.1  WARN   World
+    ...    LOG 3.1  ANY    World
+    ...    LOG 4:1  ERROR  Tidii
+    ...    LOG 4:1  ANY    Tidii
+    Status    PASS
+    Log    Hello    DEBUG
+    Log    World    WARN
+    Log    Tidii    ERROR
+
+Wrong implicit level
     [Documentation]    LOG 2.1 User Keyword
     Status    FAIL
     ...    Keyword 'BuiltIn.Log' has message with wrong level (locator '2.1').\n\n
@@ -260,7 +80,7 @@ FAILURE: Wrong implicit log level
     ...    Actual: \ \ DEBUG
     Logging User Keyword
 
-FAILURE: Wrong explicit log level
+Wrong explicit level
     [Documentation]    LOG 2.1 WARN User Keyword
     Status    FAIL
     ...    Keyword 'BuiltIn.Log' has message with wrong level (locator '2.1').\n\n
@@ -268,59 +88,169 @@ FAILURE: Wrong explicit log level
     ...    Actual: \ \ DEBUG
     Logging User Keyword
 
-FAILURE: Unexpected log message
-    [Documentation]    LOG 2.1:2 NONE
-    Status    FAIL
-    ...    Keyword 'BuiltIn.Log Many' has wrong message (locator '2.1:2').\n\n
-    ...    Expected:\nNONE\n\n
-    ...    Actual:\nKeyword
-    Logging User Keyword 2
+Messages in test setup and teardown
+    [Documentation]
+    ...    LOG setup Hello
+    ...    LOG SETUP.2 setup
+    ...    LOG SeTup.* setup
+    ...    LOG TearDown.1 DEBUG User Keyword
+    [Setup]    Log Many    Hello    setup
+    Status    PASS
+    [Teardown]    Logging User Keyword
 
-FAILURE: Non-existing keyword
-    [Documentation]    LOG 2 No keyword here
-    Status    FAIL    Test 'FAILURE: Non-existing keyword' does not have child in index 2.
+Test setup missing
+    [Documentation]    LOG setup Ooops!
+    Status    FAIL    Test '${TEST NAME}' does not have 'setup'.
 
-FAILURE: Non-existing child keyword
-    [Documentation]    LOG 1.10 No keyword here
-    Status    FAIL    Keyword 'Status' (locator '1') does not have child in index 10.
+Test teardown missing
+    [Documentation]    LOG TEARDOWN
+    Status    FAIL    Test '${TEST NAME}' does not have 'teardown'.
 
-FAILURE: Non-existing log message
-    [Documentation]    LOG 2:2 No message here
-    Status    FAIL    Keyword 'BuiltIn.Log' (locator '2') does not have child in index 2.
-    Log    Message
+Non-existing attribute
+    [Documentation]    LOG nonex Ooops, we did it again!
+    Status    FAIL    Test '${TEST NAME}' does not have 'nonex'.
 
-FAILURE: Non-existing log message wildcard
+Messages in keyword teardown
+    [Documentation]    Keyword setup isn't tested because it isn't supported by all
+    ...    Robot versions we support at the moment.
+    ...
+    ...    LOG 2.teardown.1    DEBUG  User Keyword
+    ...    LOG 2.TEARDOWN.1.1  DEBUG  User Keyword
+    Status    PASS
+    Keyword with teardown
+
+Keyword setup missing
+    [Documentation]    LOG    1.setup.666    Ooops...
+    Status    FAIL    Keyword 'Status' (locator '1') does not have 'setup'.
+
+Keyword teardown missing
+    [Documentation]    LOG    1.teardown.666    Ooops...
+    Status    FAIL    Keyword 'Status' (locator '1') does not have 'teardown'.
+
+Match using wildcard
+    [Documentation]
+    ...    LOG 2.* Hello
+    ...    LOG 2.* world
+    ...    LOG 3.1.* DEBUG User Keyword
+    Status    PASS
+    Log Many    Hello    world
+    Logging User Keyword
+
+No wildcard match in keyword
     [Documentation]    LOG 1:* Bogus message
     Status    FAIL    Keyword 'Status' (locator '1') has no message matching 'Bogus message' with level INFO.
 
-FAILURE: Non-existing message in test with wildcard
+No wildcard match in test
     [Documentation]    LOG * WARN Bogus message
     Status    FAIL    Test '${TEST NAME}' has no message matching 'Bogus message' with level WARN.
 
-FAILURE: Log locator matches keyword
-    [Documentation]    LOG 1 Ooops, this locator points to a keyword.
-    Status    FAIL    Keyword 'Status' (locator '1') does not have message in index 1.
-
-FAILURE: Log locator parent matches message
-    [Documentation]    LOG 2.1.666 Ooops, 2.1 is already a message
-    Status    FAIL    Locator '2.1' matches message and it cannot have child '666'.
-    Log    Hello!
-
-FAILURE: Log locator parent with wildcard matches message
+Wildcard parent matches message
     [Documentation]    LOG 2.1.* Ooops, 2.1 is already a message
     Status    FAIL    Locator '2.1' matches message and it cannot have child '*'.
     Log    Hello!
 
-# Control structures
-#    Fail    FIXME
-#
-# Invalid attribute
-#    Fail    FIXME
+Invalid wildcard usage
+    [Documentation]    LOG 1.*.2 Ooops
+    Status    FAIL    Message index wildcard '*' can be used only as the last locator item, got '1.*.2'.
+
+NONE
+    [Documentation]
+    ...    LOG 2   NONE
+    ...    LOG 2.1 NONE
+    ...    LOG 3.1 Message
+    ...    LOG 3.2 NONE
+    Status    PASS
+    No Operation
+    Log    Message
+
+NONE when message exists
+    [Documentation]    LOG 2.1.2 NONE
+    Status    FAIL
+    ...    Keyword 'BuiltIn.Log Many' has wrong message (locator '2.1.2').\n\n
+    ...    Expected:\nNONE\n\n
+    ...    Actual:\nKeyword
+    Logging User Keyword 2
+
+NONE when locator does not match
+    [Documentation]    LOG 1.10.2 NONE
+    Status    FAIL    Keyword 'Status' (locator '1') does not have child in index 10.
+
+NONE cannot be used with wildcards
+    [Documentation]    LOG 1.1:* NONE
+    Status    FAIL    Message index wildcard '*' cannot be used with 'NONE' message.
+
+REGEXP
+    [Documentation]
+    ...    LOG 2 REGEXP: H[ei]l{2}o w\\w+!
+    ...    LOG 2 REGEXP: Hell.*
+    ...    LOG 3 REGEXP: Multi.*message
+    Status    PASS
+    Log    Hello world!
+    Log    Multi\nline\nmessage
+
+GLOB
+    [Documentation]
+    ...    LOG 2 GLOB: *world!
+    ...    LOG 2 GLOB: Hell? ***!
+    Status    PASS
+    Log    Hello world!
+    Log    Multi\nline\nmessage
+
+STARTS
+    [Documentation]
+    ...    LOG 2 STARTS: Hello
+    ...    LOG 2 STARTS: Hell
+    ...    LOG 3 STARTS: Multi
+    Status    PASS
+    Log    Hello world!
+    Log    Multi\nline\nmessage
+
+COUNT
+    [Documentation]    This should probably be called LINES instaed.
+    ...    LOG 2 COUNT: 3
+    Status    PASS
+    Log    one\ntwo\nthree
+
+Empty message
+    [Documentation]    LOG 2
+    Status    PASS
+    Log    ${EMPTY}
+
+Leading and trailing whitespace is ignored
+    [Documentation]    LOG 2 xxx
+    Status    PASS
+    Log    ${SPACE*10}xxx${SPACE*10}
+
+Control structure parents
+    [Documentation]
+    ...    LOG 2.1.1 Hi from IF!
+    ...    LOG 3.2.1 Hi from ELSE!
+    ...    LOG 4.1.1 a
+    ...    LOG 4.2.1 b
+    Status    PASS
+    IF    True
+        Log    Hi from IF!
+    END
+    IF    False
+        Fail    Not run
+    ELSE
+        Log    Hi from ELSE!
+    END
+    FOR    ${x}    IN    a    b
+        Log    ${x}
+    END
+
+Non-existing message with control structure parent
+    [Documentation]    LOG 2.1 No message here!
+    Status    FAIL    IF (locator '2.1') does not have message in index 1.
+    IF    True
+        Log    Hi from IF!
+    END
 
 
 *** Keywords ***
 Status
-    [Arguments]    ${status}    ${message}=${CHECKED}    @{extra}
+    [Arguments]    ${status}    ${message}=Test status has been checked.    @{extra}
     ${message} =    Catenate    SEPARATOR=    ${message}    @{extra}
     Log    ${status}
     Log    ${message}

@@ -69,8 +69,9 @@ class StatusCheckerChecker(ResultVisitor):
             )
 
     def _get_expected(self, test):
-        kw = test.setup or test.body[0]
-        assert kw.name == "Status", "Status keyword missing!"
+        if not test.body or test.body[0].name != "Status":
+            raise AssertionError(f"Test {test.name} does not have status keyword!")
+        kw = test.body[0]
         return (kw.body[1].messages[0].message, kw.body[2].messages[0].message)
 
     def print_status(self):
