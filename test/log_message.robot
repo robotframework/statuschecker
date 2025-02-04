@@ -98,6 +98,11 @@ Messages in test setup and teardown
     Status    PASS
     [Teardown]    Logging User Keyword
 
+Non-existing message under setup
+    [Documentation]    LOG setup Nothing here!
+    [Setup]    No Operation
+    Status    FAIL    Keyword 'BuiltIn.No Operation' (locator 'setup') does not have child in index 1.
+
 Test setup missing
     [Documentation]    LOG setup Ooops!
     Status    FAIL    Test '${TEST NAME}' does not have 'setup'.

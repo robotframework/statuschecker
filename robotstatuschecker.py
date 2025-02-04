@@ -269,14 +269,14 @@ class LogMessageChecker(BaseChecker):
     def _get_error_prefix(
         self, parent: "TestCase|BodyItem", locator: "list[str|int]"
     ) -> str:
-        typ = getattr(parent, "type", "TEST")  # `TestCase.type` is new in RF 7.2.
-        if typ in ("TEST", "KEYWORD"):
-            prefix = f"{typ.title()} '{self._get_name(parent)}'"
+        if isinstance(parent, TestCase):
+            prefix = f"Test '{self._get_name(parent)}'"
+        elif isinstance(parent, Keyword):
+            prefix = f"Keyword '{self._get_name(parent)}'"
         else:
-            prefix = self._get_name(parent)
+            prefix = parent.type
         if locator:
-            locator_str = ".".join(str(part) for part in locator)
-            prefix += f" (locator '{locator_str}')"
+            prefix += f" (locator '{'.'.join(str(part) for part in locator)}')"
         return prefix
 
     def _get_name(self, item: "TestCase|BodyItem") -> str:
