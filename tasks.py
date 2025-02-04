@@ -124,6 +124,8 @@ def lint(ctx):
             "NormalizeAssignments:equal_sign_type=space_and_equal_sign",
             "--configure",
             "NormalizeAssignments:equal_sign_type_variables=space_and_equal_sign",
+            "--configure",
+            "InlineIf:enabled=False",
             "test",
         ]
     )
