@@ -242,7 +242,7 @@ class LogMessageChecker(BaseChecker):
     ) -> "BodyItem":
         prefix = self._get_error_prefix(parent, expected.locator[:level])
         try:
-            item = parent.body[index - 1]
+            item = self._flatten(parent.body)[index - 1]
             if item.type == item.MESSAGE or not require_message:
                 return item
             raise NotFound(f"{prefix} does not have message in index {index}.")
@@ -252,6 +252,18 @@ class LogMessageChecker(BaseChecker):
             ):
                 raise CheckOk
             raise NotFound(f"{prefix} does not have child in index {index}.")
+
+    def _flatten(self, body) -> "list[BodyItem]":
+        try:
+            return body.flatten()
+        except AttributeError:  # Body.flatten() is new in RF 5.0.
+            flattened = []
+            for item in body:
+                if item.type in ("IF/ELSE ROOT", "TRY/EXCEPT ROOT"):
+                    flattened.extend(item.body)
+                else:
+                    flattened.append(item)
+            return flattened
 
     def _get_item_by_attribute(
         self,

@@ -228,10 +228,10 @@ Leading and trailing whitespace is ignored
 
 Control structure parents
     [Documentation]
-    ...    LOG 2.1.1 Hi from IF!
-    ...    LOG 3.2.1 Hi from ELSE!
-    ...    LOG 4.1.1 a
-    ...    LOG 4.2.1 b
+    ...    LOG 2.1 Hi from IF!
+    ...    LOG 4.1 Hi from ELSE!
+    ...    LOG 5.1.1 a
+    ...    LOG 5.2.1 b
     Status    PASS
     IF    True
         Log    Hi from IF!
@@ -246,8 +246,8 @@ Control structure parents
     END
 
 Non-existing message with control structure parent
-    [Documentation]    LOG 2.1 No message here!
-    Status    FAIL    IF (locator '2.1') does not have message in index 1.
+    [Documentation]    LOG 2 No message here!
+    Status    FAIL    IF (locator '2') does not have message in index 1.
     IF    True
         Log    Hi from IF!
     END
