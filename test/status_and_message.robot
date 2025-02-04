@@ -121,8 +121,9 @@ Status with log message
     ...    ${CHECKED}\n\n
     ...    Original status: FAIL\n\n
     ...    Original message:\nExpected
-    Log     Hello!
+    Log    Hello!
     Fail    Expected
+
 
 *** Keywords ***
 Status
