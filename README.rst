@@ -8,13 +8,11 @@ Introduction
 ------------
 
 StatusChecker is a tool for validating that executed `Robot Framework`_
-test cases have expected statuses and log messages. It is mainly useful
-for Robot Framework test library developers who want to use Robot
-Framework to also test their libraries. StatusChecker 1.3 and newer are
-compatible both with Python 2 and Python 3.
+tests have expected statuses and log messages. It is mainly useful
+for Robot Framework library developers who want to test their libraries
+using Robot Framework.
 
-StatusChecker project is hosted at GitHub_ and downloads are at
-PyPI_.
+StatusChecker project is hosted at GitHub_ and downloads are at PyPI_.
 
 .. _Robot Framework: http://robotframework.org
 .. _GitHub: https://github.com/robotframework/statuschecker
@@ -50,28 +48,23 @@ Programmatically:
     process_output('infile.xml', 'outfile.xml')
 
 If an output file is not given, the input file is edited in place.
+If you want to get a log and a report, you need to use the Rebot tool
+separately afterwards.
 
 Defining expected test status
 -----------------------------
 
-By default, all test cases are expected to *PASS* and have no
-message. Changing the expected status to *FAIL* is done by having
-the word ``FAIL`` (in uppercase) somewhere in the test case
-documentation. The expected error message must then follow
-the ``FAIL`` marker.
+By default, all tests are expected to *PASS* and have no message.
+Changing the expected status to *FAIL* is done by having the word
+``FAIL`` (case-sensitive) somewhere in the test documentation.
+The expected error message must then follow the ``FAIL`` marker.
 
-For robotframework version 4 you can also change the expected status
-to *SKIP* by adding the word ``SKIP`` in the test case documentation.
-Like Fail, the expected skip message must follow the word ``SKIP``.
-If a test documentation contains the words ``FAIL`` and ``SKIP``, ``SKIP``
-will be ignored and the expected status will be *FAIL*.
-
-If a test is expected to *PASS* with a certain message, the word
-``PASS`` must be added to its documentation explicitly and the
-expected message given after that.
-
-If a message check should happen in test setup or teardown, that check
-must be prefixed with ``SETUP`` or ``TEARDOWN`` word.
+If the test is expected to be skipped, you can change the expected status
+to *SKIP* by adding the word ``SKIP`` in the documentation. Also in
+this case the expected message must follow the marker. If a test is
+expected to *PASS* with a certain message, the word ``PASS`` must be
+added to its documentation explicitly and the expected message given
+after that.
 
 The expected message can also be specified as a regular expression by
 prefixing it with ``REGEXP:``. The specified regular expression
@@ -92,131 +85,143 @@ statuses and messages:
 .. sourcecode:: robotframework
 
     *** Test Cases ***
-    Simple failure
-        [Documentation]    FAIL Expected error message
-        Steps
+    Implicit PASS
+        Log    Hello!
 
-    Check in test setup is done by SETUP marker
-        [Documentation]    LOG SETUP    This first log message in test setup
-        [Setup]    Test specific setup
-        Steps
-
-    Exclude documentation before marker
-        [Documentation]    This text is ignored FAIL Expected error message
-        Steps
-
-    Regexp example
-        [Documentation]    FAIL REGEXP: (IOError|OSError): .*
-        Steps
-
-    Glob example
-        [Documentation]    FAIL GLOB: ??Error: *
-        Steps
-
-    Start example
-        [Documentation]    FAIL STARTS: IOError:
-        Steps
-
-    Passing without message
-        Steps
-
-    Passing with message
+    Explicit PASS with message
         [Documentation]    PASS Expected message
-        Steps
+        Pass Execution    Expected message
+
+    Expected FAIL
+        [Documentation]    FAIL Expected failure
+        Fail    Expected failure
+
+    Expected SKIP
+        [Documentation]    Text before marker is ignored SKIP Expected skip
+        Skip    Expected skip
+
+    Message using REGEXP
+        [Documentation]    FAIL REGEXP: (IOError|OSError): .*
+        Fail    IOError: Unknown error
+
+    Message using GLOB
+        [Documentation]    FAIL GLOB: ??Error: *
+        Fail    IOError: Unknown error
+
+    Message using STARTS
+        [Documentation]    FAIL STARTS: IOError:
+        Fail    IOError: Unknown error
+
 
 Defining expected log messages
 ------------------------------
 
-The expected keyword log messages can also be defined in the test case
-documentation using a syntax such as::
+In addition to verifying test statuses and messages, it possible to verify
+messages logged by keywords. Expected log messages are defined in the test
+documentation using this syntax::
 
-   LOG x.y:z LEVEL Actual message
+   LOG x.y.z LEVEL Actual message
 
-The part before the colon specifies the keyword to check. For
-example, ``1`` means first keyword, ``1.2`` is the second child
-keyword of the first keyword, and so on.
+The syntax consists of the following parts:
 
-The part after the colon species the message. For example, ``1:2``
-means the second message of the first keyword and ``1.2:3`` is
-the third message of the second child keyword of the first keyword.
-The message index is optional and defaults to ``1``.
-The message index also supports wildcard ``*``. For example ``1:*``
-matches any message of the first keyword.
+- ``LOG`` marker (case-sensitive).
+- Locator used for finding the message. Locators typically consists of 1-based
+  indices like ``2.1.3`` matching items in test and keyword body. In addition
+  to that, they can contain ``setup`` and ``teardown`` markers mathing test and
+  keyword setup and teardown.
+- Optional, case-sensitive log level. If omitted, the level is ``INFO``.
+  Special value ``ANY`` can be used to accept any level.
+- The actual log message. Possible leading and trailing whitespace is ignored.
+  Special value ``NONE`` (case-sensitive) can be used to indicate that there
+  should be no log message.
 
-Message level is specified before the actual message, and it can be
-any of the valid log levels in capital letters. If the level is not
-given it defaults to ``INFO``. Starting from 1.4 release also
-``ERROR`` level is supported. The message level also supports wildcard
-``ANY`` which will match all log levels.
+The locator can either point directly to the message to be verified or
+to the parent element of the message. In the latter case the actual message
+is expected to be the first item in parent's body. If the message index
+is not known, it is possible use the asterisk as a wildcard like ``2.*``
+to match any message. When a locator points directly to a message, it is
+possible to use ``:`` as the message separator instead of ``.``, but this
+support is deprecated and may be removed in the future.
 
-Possible leading and trailing whitespace is ignored both in the expected
-and in the actual log message.
-
-This syntax can be used multiple times to test multiple messages.  It
-also works together with specifying the expected error message with
-``FAIL``, but it that case ``FAIL`` and the expected error must
-be first.
-
-It is also possible to give the message as a regular expression or glob
-pattern or to give just the start of the message. This is accomplished
-by prefixing the message with ``REGEXP:``, ``GLOB:`` or ``STARTS:``,
-respectively, exactly like when `defining expected test status`_.
-
-Finally, to check that a keyword does not have a certain message, it
-is possible to use ``NONE`` in the place of the message.
+If test status and message is also tested, they must be specified before
+the ``LOG`` marker using the syntax explained in the previous section.
+If there are multiple message to be tested, the ``LOG`` marker can be used
+multiple times. In such cases it is often a good idea to split the documentation
+to multiple lines.
 
 .. sourcecode:: robotframework
 
     *** Test cases ***
-    Simple example
-        [Documentation]    LOG 1        Hello, world!
-        Steps
+    Locator points to message parent
+        [Documentation]    LOG 1 Hello! LOG 2 first LOG 3.1 Nested!
+        Log    Hello!
+        Log Many    first    second    third
+        User Keyword
 
-    Nested keywords
-        [Documentation]    LOG 2.1      1st child of 2nd kw
-        Steps
+    Locator points to directly to message
+        [Documentation]    Splitting can enhance readability. This text is ignored.
+        ...    LOG 1.1 Hello!
+        ...    LOG 2.2 second
+        ...    LOG 3.1.1 Nested!
+        Log    Hello!
+        Log Many    first    second    third
+        User Keyword
 
-    Message index
-        [Documentation]    LOG 2:2      2nd msg of 2nd kw
-        Steps
+    Message in setup and teardown
+        [Documentation]
+        ...    LOG    setup         Hello!
+        ...    LOG    teardown.1    Nested!
+        [Setup]    Log    Hello!
+        No Operation
+        [Teardown]    User Keyword
 
-    Nested and index
-        [Documentation]    LOG 3.1:2    2nd msg of 3rd kw's 1st child
-        Steps
-
-    Log levels
-        [Documentation]    LOG 2        DEBUG Debug-level message
-        ...                LOG 1.2:3    WARN Warning
-        Steps
-
-    Multiple messages
-        [Documentation]    LOG 1        First tested message
-        ...                LOG 1.2      Second tested message
-        ...                LOG 2.2.1    DEBUG Third tested message
-        Steps
-
-    Status and log
-        [Documentation]    FAIL         Expected error message
-        ...                LOG 1.2      Expected log message
-        Steps
-
-    Regexp message
-        [Documentation]    LOG 1        REGEXP: (Hello|Hi) world!
-        Steps
-
-    Glob message
-        [Documentation]    LOG 1        GLOB: * world!
-        Steps
-
-    Start of the message
-        [Documentation]    LOG 1        STARTS: Hello w
-        Steps
+    Wildcard
+        [Documentation]    LOG 1.* first
+        Log Many    first    second    third
 
     No message
-        [Documentation]    LOG 1:1      Test that we have only 1 msg
-        ...                LOG 1:2      NONE
-        Steps
+        [Documentation]
+        ...    LOG    1.1    one
+        ...    LOG    1.2    two
+        ...    LOG    1.3    NONE
+        Log Many    one    two
 
-    Count Messages
-        [Documentation]    LOG 4 COUNT: 2    # Fourth keyword should have excatly 2 messages.
-        Steps
+    Log levels
+        [Documentation]
+        ...    LOG    1    DEBUG    first
+        ...    LOG    2    INFO     second
+        ...    LOG    3    ANY      third
+        Log    first    level=DEBUG
+        Log    second   level=INFO
+        Log    third    level=DEBUG
+
+    Test status and log message
+        [Documentation]    FAIL    Expected failure
+        ...    LOG    1    INFO    Hello!
+        ...    LOG    2    FAIL    Expected failure
+        Log    Hello!
+        Fail    Expected failure
+
+    *** Keywords ***
+    User Keyword
+        Log    Nested!
+
+If the message is not known exactly, it is possible to match it as a regular
+expression or glob pattern or to give just the beginning of the message.
+This is accomplished by prefixing the message with ``REGEXP:``, ``GLOB:``
+or ``STARTS:``, respectively, exactly like when `defining expected test status`_.
+
+.. sourcecode:: robotframework
+
+    *** Test cases ***
+    Log message using REGEXP
+        [Documentation]    LOG 1 REGEXP: Hello, .*!
+        Log    Hello, Robots!
+
+    Log message using GLOB
+        [Documentation]    LOG 1 GLOB: Hello, *!
+        Log    Hello, Robots!
+
+    Log message using STARTS
+        [Documentation]    LOG 1 STARTS: Hello
+        Log    Hello, Robots!
