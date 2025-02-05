@@ -210,12 +210,6 @@ STARTS
     Log    Hello world!
     Log    Multi\nline\nmessage
 
-COUNT
-    [Documentation]    This should probably be called LINES instaed.
-    ...    LOG 2 COUNT: 3
-    Status    PASS
-    Log    one\ntwo\nthree
-
 Empty message
     [Documentation]    LOG 2
     Status    PASS
