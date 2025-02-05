@@ -154,8 +154,8 @@ class BaseChecker:
         if actual == expected:
             return True
         if expected.startswith("REGEXP:"):
-            pattern = f"^{expected.replace('REGEXP:', '', 1).strip()}$"
-            if re.match(pattern, actual, re.DOTALL):
+            pattern = expected.replace('REGEXP:', '', 1).strip()
+            if re.fullmatch(pattern, actual, re.DOTALL):
                 return True
         if expected.startswith("GLOB:"):
             pattern = expected.replace("GLOB:", "", 1).strip()

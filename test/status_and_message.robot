@@ -94,6 +94,14 @@ REGEXP
     ...    Original message:\nPattern is here\nmultiline 123
     Fail    Pattern is here\nmultiline 123
 
+REGEXP with flags
+    [Documentation]    FAIL REGEXP: (?i)case: INSENSITIVE
+    Status    PASS
+    ...    ${CHECKED}\n\n
+    ...    Original status: FAIL\n\n
+    ...    Original message:\nCASE: insensitive
+    Fail    CASE: insensitive
+
 GLOB
     [Documentation]    SKIP GLOB: Globs ??? way *wl\neven *!?!
     Status    PASS
