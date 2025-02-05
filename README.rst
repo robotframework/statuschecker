@@ -35,9 +35,26 @@ extracting it. After that you can install the tool with::
 Usage
 -----
 
-From the command line::
+As a tool::
 
-    python -m robotstatuschecker infile [outfile]
+    python -m robotstatuschecker output.xml
+    python -m robotstatuschecker output.xml checked.xml
+
+The first argument is the file to check and the latter is where to save
+the results. If only one argument is given, that file is modified in place.
+If you want to get log and report files, you need to generate them separately
+with the ``rebot`` tool.
+
+As a pre-Rebot modifier::
+
+    robot --prerebotmodifier robotstatuschecker.StatusChecker tests.robot
+    rebot --prerebotmodifier robotstatuschecker.StatusChecker output.xml
+    rebot --prerebotmodifier robotstatuschecker.StatusChecker --output checked.xml output.xml
+
+When used as part of execution with ``robot``, results are checked before
+log and report files are generated, but the output.xml file is not modified.
+The same is true also with ``rebot`` by default, but it is possible to use
+the ``--output`` option to specify where to save the modified results.
 
 Programmatically:
 
@@ -45,11 +62,10 @@ Programmatically:
 
     from robotstatuschecker import process_output
 
-    process_output('infile.xml', 'outfile.xml')
+    process_output('output.xml', 'checked.xml')
 
-If an output file is not given, the input file is edited in place.
-If you want to get a log and a report, you need to use the Rebot tool
-separately afterwards.
+Also in this usage the second argument is optional and the input file is
+modified in place if it is not given.
 
 Defining expected test status
 -----------------------------
