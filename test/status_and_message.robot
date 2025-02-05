@@ -86,7 +86,7 @@ FAIL with wrong message
     ...    Original message:\nMessage
     Fail    Message
 
-FAIL with REGEXP
+REGEXP
     [Documentation]    FAIL REGEXP: Pattern is here.* \\d+
     Status    PASS
     ...    ${CHECKED}\n\n
@@ -94,15 +94,15 @@ FAIL with REGEXP
     ...    Original message:\nPattern is here\nmultiline 123
     Fail    Pattern is here\nmultiline 123
 
-FAIL with GLOB
-    [Documentation]    FAIL GLOB: Globs ??? way *wl\neven *!?!
+GLOB
+    [Documentation]    SKIP GLOB: Globs ??? way *wl\neven *!?!
     Status    PASS
     ...    ${CHECKED}\n\n
-    ...    Original status: FAIL\n\n
+    ...    Original status: SKIP\n\n
     ...    Original message:\nGlobs are way kewl\neven in multile lines\n!!!
-    Fail    Globs are way kewl\neven in multile lines\n!!!
+    Skip    Globs are way kewl\neven in multile lines\n!!!
 
-FAIL with STARTS
+STARTS
     [Documentation]    FAIL STARTS: This is start
     Status    PASS
     ...    ${CHECKED}\n\n
