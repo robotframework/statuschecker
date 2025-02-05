@@ -110,8 +110,9 @@ class Expected:
         if "LOG" not in doc:
             return doc, ""
         log_index = doc.find("LOG")
-        status_indices = [doc.find(status) for status in ("FAIL", "SKIP", "PASS")
-                          if status in doc]
+        status_indices = [
+            doc.find(status) for status in ("FAIL", "SKIP", "PASS") if status in doc
+        ]
         if not status_indices or log_index < min(status_indices):
             return "", doc
         return doc[:log_index], doc[log_index:]
@@ -165,7 +166,7 @@ class BaseChecker:
         if actual == expected:
             return True
         if expected.startswith("REGEXP:"):
-            pattern = expected.replace('REGEXP:', '', 1).strip()
+            pattern = expected.replace("REGEXP:", "", 1).strip()
             if re.fullmatch(pattern, actual, re.DOTALL):
                 return True
         if expected.startswith("GLOB:"):
