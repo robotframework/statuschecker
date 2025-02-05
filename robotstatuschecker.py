@@ -101,25 +101,36 @@ class StatusChecker(ResultVisitor):
 
 class Expected:
     def __init__(self, doc: str):
-        self.status = self._get_status(doc)
-        self.message = self._get_message(doc)
-        self.logs = self._get_logs(doc)
+        status, logs = self._split_status_and_logs(doc)
+        self.status = self._get_status(status)
+        self.message = self._get_message(status)
+        self.logs = self._get_logs(logs)
 
-    def _get_status(self, doc: str) -> str:
-        if "FAIL" in doc:
+    def _split_status_and_logs(self, doc: str) -> "tuple[str, str]":
+        if "LOG" not in doc:
+            return doc, ""
+        log_index = doc.find("LOG")
+        status_indices = [doc.find(status) for status in ("FAIL", "SKIP", "PASS")
+                          if status in doc]
+        if not status_indices or log_index < min(status_indices):
+            return "", doc
+        return doc[:log_index], doc[log_index:]
+
+    def _get_status(self, config: str) -> str:
+        if "FAIL" in config:
             return "FAIL"
-        if "SKIP" in doc:
+        if "SKIP" in config:
             return "SKIP"
         return "PASS"
 
-    def _get_message(self, doc: str) -> str:
+    def _get_message(self, config: str) -> str:
         for status in ["FAIL", "SKIP", "PASS"]:
-            if status in doc:
-                return doc.split(status, 1)[1].split("LOG", 1)[0].strip()
+            if status in config:
+                return config.split(status, 1)[1].strip()
         return ""
 
-    def _get_logs(self, doc: str) -> "list[ExpectedLog]":
-        return [ExpectedLog(item) for item in doc.split("LOG")[1:]]
+    def _get_logs(self, config: str) -> "list[ExpectedLog]":
+        return [ExpectedLog(item) for item in config.split("LOG")[1:]]
 
 
 class ExpectedLog:

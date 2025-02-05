@@ -132,6 +132,11 @@ Status with log message
     Log    Hello!
     Fail    Expected
 
+FAIL log level when test does not fail
+    [Documentation]    LOG    2.1    FAIL    This is caught!
+    Status    PASS
+    Run Keyword And Ignore Error    Fail    This is caught!
+
 
 *** Keywords ***
 Status
