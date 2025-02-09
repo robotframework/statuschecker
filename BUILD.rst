@@ -131,7 +131,7 @@ Creating distributions
 3. Create source distribution and universal (i.e. Python 2 and 3 compatible)
    `wheel <http://pythonwheels.com>`_::
 
-      python setup.py sdist bdist_wheel --universal
+      python -m build
       ls -l dist
 
    Distributions can be tested locally if needed.
