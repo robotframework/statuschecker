@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "robotstatuschecker"
-version = "4.1.0"
+version = "4.1.1"
 description = "A tool for checking that Robot Framework test cases have expected statuses and log messages."
 readme = "README.rst"
 authors = [{name = "Pekka Klärck"}, {name = "Tatu Aalto"}, {name = "Robot Framework Developers"}]

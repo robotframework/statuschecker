@@ -48,7 +48,7 @@ from robot.model import BodyItem  # type: ignore
 from robot.result import Keyword, Message, Result, TestCase  # type: ignore
 from robot.utils import Matcher  # type: ignore
 
-__version__ = "4.1.0"
+__version__ = "4.1.1"
 
 
 def process_output(in_path: "str|Path", out_path: "str|Path|None" = None) -> int:
