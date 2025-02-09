@@ -1,3 +1,38 @@
+[build-system]
+requires = ["setuptools >= 75.8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robotstatuschecker"
+version = "4.1.0"
+description = "A tool for checking that Robot Framework test cases have expected statuses and log messages."
+readme = "README.rst"
+authors = [{name = "Pekka Klärck"}, {name = "Tatu Aalto"}, {name = "Robot Framework Developers"}]
+requires-python = ">=3.8,<4.0"
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "License :: OSI Approved :: Apache Software License",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Testing",
+  "Framework :: Robot Framework",
+]
+keywords = [
+  "robotframework",
+  "testing",
+  "testautomation",
+  "atdd",
+]
+dependencies = [
+  "robotframework >= 6.1.1",
+]
+license = { file = "LICENSE.txt" }
+
+[project.urls]
+"Homepage" = "https://github.com/robotframework/statuschecker"
+"Issues" = "https://github.com/robotframework/statuschecker/issues"
+"Changelog" = "https://github.com/robotframework/statuschecker/tree/master/docs/releasenotes"
+
 [tool.ruff]
 exclude = [
   "__pycache__",

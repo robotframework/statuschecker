@@ -42,7 +42,7 @@ IS_GITHUB_ACTIONS = os.environ.get("GITHUB_ACTIONS_RUNNIN_RUFF_LINT")
 
 @task
 def set_version(ctx, version):
-    """Set project version in `robotstatuschecker.py`` file.
+    """Set project version in `robotstatuschecker.py`` and ``pyproject.toml`` files.
     Args:
         version: Project version to set or ``dev`` to set development version.
     Following PEP-440 compatible version numbers are supported:
@@ -57,6 +57,14 @@ def set_version(ctx, version):
     """
     version = Version(version, VERSION_PATH, VERSION_PATTERN)
     version.write()
+    with Path("pyproject.toml").open("r", encoding="utf-8") as file:
+        lines = file.readlines()
+    for line in lines:
+        if line.startswith("version = "):
+            lines[lines.index(line)] = f'version = "{version}"\n'
+            break
+    with Path("pyproject.toml").open("w", encoding="utf-8") as file:
+        file.writelines(lines)
     print(version)
 
 
